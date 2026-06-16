@@ -16,7 +16,7 @@ const Orders = () => {
     setError('');
     try {
       const response = await api.get('/orders');
-      setOrders(response.data || []);
+      setOrders(response.data?.data || response.data || []);
     } catch (err) {
       console.error(err);
       setError('No se pudieron cargar los pedidos. Por favor, intenta de nuevo.');
@@ -103,7 +103,7 @@ const Orders = () => {
           {orders.map((order) => {
             const isExpanded = expandedOrder === order.id;
             const items = order.items || [];
-            const orderTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const orderTotal = order.total !== undefined ? order.total : items.reduce((sum, item) => sum + ((item.unit_price || item.price || 0) * item.quantity), 0);
 
             return (
               <div 
@@ -215,7 +215,7 @@ const Orders = () => {
                               <strong style={{ color: 'var(--primary)' }}> x{item.quantity}</strong>
                             </span>
                             <span style={{ fontWeight: 600 }}>
-                              {formatPrice(item.price * item.quantity)}
+                              {formatPrice(item.subtotal || ((item.unit_price || item.price || 0) * item.quantity))}
                             </span>
                           </div>
                         ))}

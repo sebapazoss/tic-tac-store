@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ShoppingBag, ArrowLeft, CreditCard } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -16,14 +16,6 @@ const Checkout = ({ onNavigate }) => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!user) {
-      onNavigate('login');
-    }
-  }, [user, onNavigate]);
-
-  if (!user) return null;
 
   const formatPrice = (val) => {
     return new Intl.NumberFormat('es-AR', {
@@ -49,23 +41,43 @@ const Checkout = ({ onNavigate }) => {
 
     setLoading(true);
     try {
-      const orderData = {
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
-        shipping_address: shippingAddress,
-        notes: notes,
-        items: cart.map(item => ({
-          product_id: item.product.id,
-          quantity: item.quantity
-        }))
-      };
+      let response;
+      if (user) {
+        // Authenticated flow: checkout from database cart
+        const checkoutData = {
+          customer_name: customerName,
+          customer_email: customerEmail,
+          customer_phone: customerPhone,
+          shipping_address: shippingAddress,
+          notes: notes
+        };
+        response = await api.post('/cart/checkout', checkoutData);
+      } else {
+        // Guest flow: place order sending items from local storage
+        const orderData = {
+          customer_name: customerName,
+          customer_email: customerEmail,
+          customer_phone: customerPhone,
+          shipping_address: shippingAddress,
+          notes: notes,
+          items: cart.map(item => ({
+            product_id: item.product.id,
+            quantity: item.quantity
+          }))
+        };
+        response = await api.post('/orders', orderData);
+      }
 
-      await api.post('/orders', orderData);
+      const orderId = response.data?.id || response.data?.data?.id || '';
       
       clearCart();
-      alert('Pedido realizado con éxito.');
-      onNavigate('orders');
+      if (user) {
+        alert(orderId ? `Pedido realizado con éxito. Orden #${orderId}` : 'Pedido realizado con éxito.');
+        onNavigate('orders');
+      } else {
+        alert(orderId ? `Pedido realizado con éxito. Orden #${orderId}. Guarda este número para tu referencia.` : 'Pedido realizado con éxito.');
+        onNavigate('catalog');
+      }
     } catch (err) {
       console.error(err);
       if (err.response && err.response.data && err.response.data.message) {

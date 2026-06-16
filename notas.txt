@@ -1,0 +1,9 @@
+faltaria que un cliente que realizo un pedido pueda visualizar el mismo y el estado sin loguearse, 
+solo ver, no modificar. 
+
+como podemos hacer para que el cliente que realizo el pedido pueda consultar el estado 
+solo de ese pedido y no de todos?? 
+
+agregar opcion de ordenar el catalogo por precios acendente o decendente
+
+para mas adelante la parte del pago MUY IMPORTANTE 

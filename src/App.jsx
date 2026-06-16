@@ -19,7 +19,7 @@ import Orders from './pages/Orders';
 import Profile from './pages/Profile';
 
 function AppContent() {
-  const { loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [currentView, setCurrentView] = useState('catalog'); // catalog, product-detail, login, register, checkout, orders, profile
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -71,7 +71,7 @@ function AppContent() {
         )}
 
         {currentView === 'checkout' && (
-          <Checkout onNavigate={handleNavigate} />
+          <Checkout key={user?.id || 'guest'} onNavigate={handleNavigate} />
         )}
 
         {currentView === 'orders' && (
