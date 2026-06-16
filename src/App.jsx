@@ -30,7 +30,7 @@ function AppContent() {
 
   const handleNavigate = (view) => {
     setCurrentView(view);
-    // Smooth scroll to top on page navigation for a premium mobile experience
+    // Smooth scroll to top for mobile layout transitions
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -52,14 +52,6 @@ function AppContent() {
         {currentView === 'catalog' && (
           <Catalog 
             onSelectProduct={handleSelectProduct}
-            onEditProduct={() => {
-              // Directs sellers to profile where they manage their products
-              handleNavigate('profile');
-            }}
-            onCreateProduct={() => {
-              // Directs sellers to profile where they manage their products
-              handleNavigate('profile');
-            }}
           />
         )}
 
@@ -67,7 +59,6 @@ function AppContent() {
           <ProductDetail 
             product={selectedProduct}
             onBack={() => handleNavigate('catalog')}
-            onEdit={() => handleNavigate('profile')}
           />
         )}
 
@@ -92,7 +83,7 @@ function AppContent() {
         )}
       </main>
 
-      {/* Slide-out Shopping Cart */}
+      {/* Slide-out Shopping Cart Drawer */}
       <CartDrawer 
         isOpen={cartOpen} 
         onClose={() => setCartOpen(false)} 

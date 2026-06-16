@@ -1,25 +1,22 @@
 import React from 'react';
-import { ShoppingBag, Edit } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-const ProductCard = ({ product, onSelect, onEdit }) => {
-  const { user } = useAuth();
+const ProductCard = ({ product, onSelect }) => {
   const { addToCart } = useCart();
 
-  const { name, description, price, stock, brand, image_url } = product;
+  const { name, price, stock, brand, image_url } = product;
 
-  // Format currency (e.g. $35.000,00)
+  // Format currency
   const formatPrice = (val) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 0 // Clean integer price display
+      minimumFractionDigits: 0
     }).format(val);
   };
 
   const isOutOfStock = stock <= 0;
-  const isSellerOrAdmin = user && (user.role === 'vendedor' || user.role === 'admin');
 
   return (
     <div 
@@ -27,7 +24,7 @@ const ProductCard = ({ product, onSelect, onEdit }) => {
       onClick={() => onSelect(product)}
       style={{ textAlign: 'left' }}
     >
-      {/* Product Image Container */}
+      {/* Product Image */}
       <div 
         className="relative aspect-[4/5] bg-surface-container-low rounded-xl mb-3 overflow-hidden product-card-shadow"
         style={{
@@ -61,11 +58,11 @@ const ProductCard = ({ product, onSelect, onEdit }) => {
             letterSpacing: '0.1em',
             color: 'var(--text-secondary)'
           }}>
-            HOROLOGY
+            TIC-TAC
           </div>
         )}
 
-        {/* Dynamic stock label overlay (Minimalist text, no emojis) */}
+        {/* Stock status overlay */}
         {isOutOfStock && (
           <span style={{
             position: 'absolute',
@@ -84,12 +81,12 @@ const ProductCard = ({ product, onSelect, onEdit }) => {
           </span>
         )}
 
-        {/* Quick Action Button overlay */}
-        {isSellerOrAdmin ? (
+        {/* Add to Cart icon button */}
+        {!isOutOfStock && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onEdit(product);
+              addToCart(product, 1);
             }}
             style={{
               position: 'absolute',
@@ -106,44 +103,17 @@ const ProductCard = ({ product, onSelect, onEdit }) => {
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
             }}
-            title="Editar producto"
+            title="Añadir al carrito"
           >
-            <Edit size={14} style={{ color: 'var(--primary)' }} />
+            <ShoppingBag size={14} style={{ color: 'var(--primary)' }} />
           </button>
-        ) : (
-          !isOutOfStock && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                addToCart(product, 1);
-              }}
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                width: '32px',
-                height: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                border: 'none',
-                borderRadius: '50%',
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-              }}
-              title="Añadir al carrito"
-            >
-              <ShoppingBag size={14} style={{ color: 'var(--primary)' }} />
-            </button>
-          )
         )}
       </div>
 
-      {/* Product metadata */}
+      {/* Metadata */}
       <div style={{ padding: '0 4px' }}>
         <p className="label-caps" style={{ marginBottom: '2px', fontSize: '10px' }}>
-          {brand || 'HOROLOGY'}
+          {brand || 'TIC-TAC'}
         </p>
         <h3 style={{
           fontSize: '14px',

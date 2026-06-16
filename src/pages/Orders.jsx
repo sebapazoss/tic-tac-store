@@ -10,16 +10,12 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedOrder, setExpandedOrder] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
-
-  const isSellerOrAdmin = user && (user.role === 'vendedor' || user.role === 'admin');
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const endpoint = isSellerOrAdmin ? '/admin/orders' : '/orders';
-      const response = await api.get(endpoint);
+      const response = await api.get('/orders');
       setOrders(response.data || []);
     } catch (err) {
       console.error(err);
@@ -27,7 +23,7 @@ const Orders = () => {
     } finally {
       setLoading(false);
     }
-  }, [isSellerOrAdmin]);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -37,23 +33,6 @@ const Orders = () => {
 
   const handleToggleExpand = (id) => {
     setExpandedOrder(expandedOrder === id ? null : id);
-  };
-
-  const handleUpdateStatus = async (orderId, newStatus) => {
-    setUpdatingId(orderId);
-    try {
-      await api.patch(`/admin/orders/${orderId}`, { status: newStatus });
-      setOrders(prevOrders => 
-        prevOrders.map(order => 
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
-    } catch (err) {
-      console.error(err);
-      alert('Error al intentar cambiar el estado del pedido.');
-    } finally {
-      setUpdatingId(null);
-    }
   };
 
   const formatPrice = (val) => {
@@ -91,7 +70,7 @@ const Orders = () => {
         textAlign: 'left',
         letterSpacing: '-0.01em'
       }}>
-        {isSellerOrAdmin ? 'Pedidos de la Tienda' : 'Mis Pedidos'}
+        Mis Pedidos
       </h2>
 
       {loading ? (
@@ -116,7 +95,7 @@ const Orders = () => {
           background: '#ffffff'
         }}>
           <p style={{ fontWeight: 600, fontSize: '14px' }}>
-            {isSellerOrAdmin ? 'No existen pedidos registrados en el sistema.' : 'Aún no posees ningún pedido realizado.'}
+            Aún no has realizado ningún pedido.
           </p>
         </div>
       ) : (
@@ -174,7 +153,7 @@ const Orders = () => {
                   </div>
                 </div>
 
-                {/* Expanded Details */}
+                {/* Expanded details */}
                 {isExpanded && (
                   <div style={{
                     marginTop: '16px',
@@ -185,7 +164,6 @@ const Orders = () => {
                     gap: '16px',
                     animation: 'slideDown 0.2s ease-out'
                   }}>
-                    {/* Customer Info */}
                     <div style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -216,10 +194,9 @@ const Orders = () => {
                       )}
                     </div>
 
-                    {/* Order items details */}
                     <div>
                       <h4 className="label-caps" style={{ fontSize: '9px', marginBottom: '8px', textAlign: 'left' }}>
-                        Relojes Adquiridos
+                        Detalle del Pedido
                       </h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {items.map((item, idx) => (
@@ -244,53 +221,6 @@ const Orders = () => {
                         ))}
                       </div>
                     </div>
-
-                    {/* Status modifications */}
-                    {isSellerOrAdmin && (
-                      <div style={{
-                        borderTop: '1px solid var(--surface-container-highest)',
-                        paddingTop: '12px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px',
-                        alignItems: 'flex-start'
-                      }}>
-                        <span className="label-caps" style={{ fontSize: '9px' }}>
-                          Actualizar estado de orden
-                        </span>
-                        
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', width: '100%' }}>
-                          {['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((statusOption) => {
-                            const isCurrent = order.status === statusOption;
-                            return (
-                              <button
-                                key={statusOption}
-                                onClick={() => handleUpdateStatus(order.id, statusOption)}
-                                disabled={updatingId === order.id || isCurrent}
-                                className="btn"
-                                style={{
-                                  padding: '4px 8px',
-                                  fontSize: '10px',
-                                  minWidth: 'auto',
-                                  minHeight: 'auto',
-                                  borderRadius: '6px',
-                                  background: isCurrent ? 'var(--primary)' : 'var(--surface-container-high)',
-                                  border: `1px solid ${isCurrent ? 'var(--primary)' : 'var(--outline-variant)'}`,
-                                  color: isCurrent ? '#fff' : 'var(--text-secondary)',
-                                  opacity: updatingId === order.id ? 0.5 : 1
-                                }}
-                              >
-                                {statusOption === 'pending' && 'Pendiente'}
-                                {statusOption === 'processing' && 'Proceso'}
-                                {statusOption === 'shipped' && 'Enviado'}
-                                {statusOption === 'delivered' && 'Entregado'}
-                                {statusOption === 'cancelled' && 'Anular'}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>

@@ -8,16 +8,13 @@ const Register = ({ onNavigate }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  const [role, setRole] = useState('cliente'); // 'cliente' or 'vendedor'
   
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     if (!name || !email || !password || !passwordConfirmation) {
       setError('Por favor, completa todos los campos.');
@@ -36,17 +33,9 @@ const Register = ({ onNavigate }) => {
 
     setLoading(true);
     try {
-      const response = await register(name, email, password, passwordConfirmation, role);
-      
-      if (role === 'vendedor') {
-        setSuccess('Registro exitoso. Tu cuenta de vendedor ha sido registrada y está pendiente de aprobación por el Administrador antes de que puedas publicar relojes.');
-        setName('');
-        setEmail('');
-        setPassword('');
-        setPasswordConfirmation('');
-      } else {
-        onNavigate('catalog');
-      }
+      // Hardcode role to 'cliente' as frontend is client-only
+      await register(name, email, password, passwordConfirmation, 'cliente');
+      onNavigate('catalog');
     } catch (err) {
       console.error(err);
       if (err.response && err.response.data && err.response.data.errors) {
@@ -85,7 +74,7 @@ const Register = ({ onNavigate }) => {
           color: 'var(--text-secondary)',
           marginBottom: '24px'
         }}>
-          Únete a Horology y empieza a operar
+          Únete a Tic-Tac Store y empieza a comprar
         </p>
 
         {error && (
@@ -103,131 +92,72 @@ const Register = ({ onNavigate }) => {
           </div>
         )}
 
-        {success && (
-          <div style={{
-            background: 'var(--color-delivered-bg)',
-            border: '1px solid var(--color-delivered)',
-            borderRadius: '10px',
-            padding: '16px',
-            color: 'var(--color-delivered)',
-            fontSize: '13px',
-            marginBottom: '20px',
-            textAlign: 'left',
-            lineHeight: 1.4,
-            fontWeight: 500
-          }}>
-            {success}
-            <button
-              onClick={() => onNavigate('login')}
-              className="btn btn-success"
-              style={{
-                width: '100%',
-                marginTop: '12px',
-                minHeight: 'auto',
-                padding: '8px 12px',
-                fontSize: '11px'
-              }}
-            >
-              Iniciar Sesión
-            </button>
-          </div>
-        )}
-
-        {!success && (
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="name">Nombre completo</label>
-              <input
-                id="name"
-                type="text"
-                className="form-input"
-                placeholder="Juan Pérez"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email">Correo electrónico</label>
-              <input
-                id="email"
-                type="email"
-                className="form-input"
-                placeholder="juan@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="role">Tipo de cuenta</label>
-              <select
-                id="role"
-                className="form-input form-select"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                disabled={loading}
-                required
-              >
-                <option value="cliente">Comprador (Cliente)</option>
-                <option value="vendedor">Vendedor (Socio comercial)</option>
-              </select>
-              {role === 'vendedor' && (
-                <p style={{
-                  fontSize: '11px',
-                  color: 'var(--color-pending)',
-                  marginTop: '6px',
-                  textAlign: 'left',
-                  lineHeight: 1.3,
-                  fontWeight: 500
-                }}>
-                  Nota: Las cuentas de vendedor requieren la aprobación de un administrador para poder listar relojes en la tienda.
-                </p>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password">Contraseña</label>
-              <input
-                id="password"
-                type="password"
-                className="form-input"
-                placeholder="Mínimo 6 caracteres"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className="form-group" style={{ marginBottom: '24px' }}>
-              <label htmlFor="passwordConfirmation">Confirmar contraseña</label>
-              <input
-                id="passwordConfirmation"
-                type="password"
-                className="form-input"
-                placeholder="Repite la contraseña"
-                value={passwordConfirmation}
-                onChange={(e) => setPasswordConfirmation(e.target.value)}
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ width: '100%', marginBottom: '20px', fontSize: '11px' }}
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Nombre completo</label>
+            <input
+              id="name"
+              type="text"
+              className="form-input"
+              placeholder="Juan Pérez"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               disabled={loading}
-            >
-              {loading ? 'Registrando...' : 'Registrarme'}
-            </button>
-          </form>
-        )}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Correo electrónico</label>
+            <input
+              id="email"
+              type="email"
+              className="form-input"
+              placeholder="juan@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              className="form-input"
+              placeholder="Mínimo 6 caracteres"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: '24px' }}>
+            <label htmlFor="passwordConfirmation">Confirmar contraseña</label>
+            <input
+              id="passwordConfirmation"
+              type="password"
+              className="form-input"
+              placeholder="Repite la contraseña"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: '100%', marginBottom: '20px', fontSize: '11px' }}
+            disabled={loading}
+          >
+            {loading ? 'Registrando...' : 'Registrarme'}
+          </button>
+        </form>
 
         <p style={{
           fontSize: '12px',

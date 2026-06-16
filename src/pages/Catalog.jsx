@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, SlidersHorizontal, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../services/api';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { useAuth } from '../context/AuthContext';
 
-const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
-  const { user } = useAuth();
-  
+const Catalog = ({ onSelectProduct }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,16 +22,11 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-
-  const isSellerOrAdmin = user && (user.role === 'vendedor' || user.role === 'admin');
-  const isApproved = user && user.status === 'approved';
 
   const fetchProducts = useCallback(async (page = 1) => {
     setLoading(true);
     setError('');
     try {
-      // Calculate search query merging search input and selected category chip
       let searchQuery = search;
       if (activeCategory !== 'ALL') {
         searchQuery = searchQuery ? `${searchQuery} ${activeCategory}` : activeCategory;
@@ -54,18 +46,16 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
         setProducts(response.data.data);
         setCurrentPage(response.data.current_page || 1);
         setLastPage(response.data.last_page || 1);
-        setTotalItems(response.data.total || 0);
       } else if (Array.isArray(response.data)) {
         setProducts(response.data);
         setCurrentPage(1);
         setLastPage(1);
-        setTotalItems(response.data.length);
       } else {
         setProducts([]);
       }
     } catch (err) {
       console.error(err);
-      setError('No se pudieron cargar los productos. Por favor, asegúrate de que el servidor esté encendido.');
+      setError('No se pudieron cargar los productos. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -95,7 +85,6 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
 
   return (
     <div className="fade-in" style={{ paddingBottom: '32px' }}>
-      {/* Header and New Product Action */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -103,46 +92,11 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
         marginBottom: '20px'
       }}>
         <h2 style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.02em' }}>
-          Timepieces
+          Colecciones
         </h2>
-
-        {isSellerOrAdmin && (
-          <button
-            onClick={onCreateProduct}
-            className="btn btn-primary"
-            style={{
-              padding: '6px 12px',
-              fontSize: '11px',
-              borderRadius: '8px',
-              minHeight: 'auto'
-            }}
-            disabled={user.role === 'vendedor' && !isApproved}
-            title={user.role === 'vendedor' && !isApproved ? 'Cuenta pendiente de aprobación' : 'Agregar nuevo reloj'}
-          >
-            <Plus size={14} /> Nuevo
-          </button>
-        )}
       </div>
 
-      {/* Seller pending notification */}
-      {user && user.role === 'vendedor' && !isApproved && (
-        <div style={{
-          background: 'var(--color-pending-bg)',
-          border: '1px solid var(--color-pending)',
-          borderRadius: '10px',
-          padding: '12px 16px',
-          color: 'var(--color-pending)',
-          fontSize: '12px',
-          marginBottom: '20px',
-          textAlign: 'left',
-          lineHeight: 1.4,
-          fontWeight: 500
-        }}>
-          Aviso: Tu cuenta de vendedor está en espera de aprobación por un administrador. No podrás crear ni modificar productos hasta entonces.
-        </div>
-      )}
-
-      {/* Search Bar & Filter Button */}
+      {/* Search Bar & Filter Toggle */}
       <div style={{
         display: 'flex',
         gap: '8px',
@@ -162,7 +116,7 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
           <input
             type="text"
             className="form-input"
-            placeholder="Buscar colecciones..."
+            placeholder="Buscar relojes..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
@@ -189,14 +143,13 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
             background: showFilters ? 'var(--surface-container-high)' : 'var(--bg-primary)',
             borderColor: 'var(--outline-variant)'
           }}
-          title="Filtros"
         >
           <SlidersHorizontal size={14} />
           <span className="label-caps" style={{ fontSize: '9px', color: 'var(--primary)' }}>FILTROS</span>
         </button>
       </div>
 
-      {/* Category Chips Scrollbar (matching estilos.html) */}
+      {/* Categories chips */}
       <div className="hide-scrollbar" style={{
         display: 'flex',
         gap: '8px',
@@ -237,7 +190,7 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
         })}
       </div>
 
-      {/* Filters Form Drawer */}
+      {/* Advanced Filters Block */}
       {showFilters && (
         <div 
           className="glass-card" 
@@ -336,7 +289,7 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
         </div>
       )}
 
-      {/* Catalog items representation */}
+      {/* Grid List */}
       {loading ? (
         <LoadingSpinner />
       ) : error ? (
@@ -368,10 +321,9 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
         </div>
       ) : (
         <>
-          {/* Catalog Grid */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', // Exact grid-cols-2 from estilos.html
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
             gap: '16px',
             rowGap: '28px',
             marginBottom: '24px'
@@ -381,7 +333,6 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
                 key={product.id}
                 product={product}
                 onSelect={onSelectProduct}
-                onEdit={onEditProduct}
               />
             ))}
           </div>
@@ -408,7 +359,7 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
                   borderRadius: '8px'
                 }}
               >
-                <ChevronLeft size={16} />
+                &lt;
               </button>
               
               <span className="label-caps" style={{ fontSize: '10px' }}>
@@ -428,19 +379,12 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
                   borderRadius: '8px'
                 }}
               >
-                <ChevronRight size={16} />
+                &gt;
               </button>
             </div>
           )}
         </>
       )}
-
-      <style>{`
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 };

@@ -32,18 +32,18 @@ const Navbar = ({ onCartToggle, onNavigate }) => {
         }}
       >
         <span style={{
-          fontSize: '20px',
-          fontWeight: 700,
-          letterSpacing: '-0.02em',
+          fontSize: '18px',
+          fontWeight: 800,
+          letterSpacing: '0.05em',
           color: 'var(--primary)',
         }}>
-          HOROLOGY
+          TIC-TAC STORE
         </span>
       </div>
 
       {/* Action Buttons */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        {/* Shopping Cart Button */}
+        {/* Shopping Cart */}
         <button 
           onClick={onCartToggle}
           className="btn btn-secondary"
@@ -86,7 +86,7 @@ const Navbar = ({ onCartToggle, onNavigate }) => {
           )}
         </button>
 
-        {/* User Session Profile Link */}
+        {/* User Profile */}
         {user ? (
           <div 
             onClick={() => onNavigate('profile')}

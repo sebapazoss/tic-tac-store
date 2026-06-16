@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShoppingBag, Plus, Minus, Check, Edit } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Plus, Minus, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 
-const ProductDetail = ({ product, onBack, onEdit }) => {
-  const { user } = useAuth();
+const ProductDetail = ({ product, onBack }) => {
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const { id, name, description, price, stock, brand, image_url } = product;
+  const { name, description, price, stock, brand, image_url } = product;
 
-  // Format currency (e.g. $35.000,00)
+  // Format currency
   const formatPrice = (val) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -22,7 +20,6 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
 
   const isOutOfStock = stock <= 0;
   const isLowStock = stock > 0 && stock <= 3;
-  const isSellerOrAdmin = user && (user.role === 'vendedor' || user.role === 'admin');
 
   const handleQtyChange = (val) => {
     if (val >= 1 && val <= stock) {
@@ -66,7 +63,7 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
         flexDirection: 'column',
         background: '#ffffff'
       }}>
-        {/* Visual Container */}
+        {/* Visual Header */}
         <div style={{
           width: '100%',
           height: '280px',
@@ -107,7 +104,7 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
             />
           ) : (
             <span className="label-caps" style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-              HOROLOGY COLLECTION
+              TIC-TAC COLLECTION
             </span>
           )}
         </div>
@@ -126,7 +123,6 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
               {name}
             </h1>
 
-            {/* Price tag */}
             <span style={{
               fontSize: '22px',
               fontWeight: 700,
@@ -138,7 +134,6 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
               {formatPrice(price)}
             </span>
 
-            {/* Stock status indicator */}
             <div style={{ display: 'flex', alignItems: 'center', marginTop: '4px' }}>
               {isOutOfStock ? (
                 <span className="badge badge-cancelled">Sin Stock</span>
@@ -161,11 +156,11 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
               textAlign: 'left',
               whiteSpace: 'pre-wrap'
             }}>
-              {description || 'Este reloj de lujo no posee una descripción cargada actualmente.'}
+              {description || 'Este reloj no posee una descripción cargada actualmente.'}
             </p>
           </div>
 
-          {/* Action Row */}
+          {/* Quantity and Actions */}
           <div style={{
             borderTop: '1px solid var(--outline-variant)',
             paddingTop: '20px',
@@ -174,105 +169,92 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
             flexDirection: 'column',
             gap: '12px'
           }}>
-            {isSellerOrAdmin ? (
-              <button
-                onClick={() => onEdit(product)}
-                disabled={user.role === 'vendedor' && user.status !== 'approved'}
-                className="btn btn-primary"
-                style={{ width: '100%' }}
-              >
-                Editar Reloj
-              </button>
-            ) : (
-              <>
-                {!isOutOfStock && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    background: 'var(--surface-container-low)',
-                    padding: '8px 16px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--outline-variant)'
-                  }}>
-                    <span className="label-caps" style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>Cantidad</span>
-                    <div style={{
+            {!isOutOfStock && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'var(--surface-container-low)',
+                padding: '8px 16px',
+                borderRadius: '10px',
+                border: '1px solid var(--outline-variant)'
+              }}>
+                <span className="label-caps" style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>Cantidad</span>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: '#ffffff',
+                  borderRadius: '6px',
+                  padding: '2px',
+                  border: '1px solid var(--outline-variant)'
+                }}>
+                  <button 
+                    onClick={() => handleQtyChange(qty - 1)}
+                    disabled={qty <= 1}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-primary)',
+                      width: '28px',
+                      height: '28px',
                       display: 'flex',
                       alignItems: 'center',
-                      background: '#ffffff',
-                      borderRadius: '6px',
-                      padding: '2px',
-                      border: '1px solid var(--outline-variant)'
-                    }}>
-                      <button 
-                        onClick={() => handleQtyChange(qty - 1)}
-                        disabled={qty <= 1}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--text-primary)',
-                          width: '28px',
-                          height: '28px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          opacity: qty <= 1 ? 0.3 : 1
-                        }}
-                      >
-                        <Minus size={12} />
-                      </button>
-                      <span style={{
-                        fontSize: '13px',
-                        fontWeight: 700,
-                        width: '32px',
-                        textAlign: 'center'
-                      }}>
-                        {qty}
-                      </span>
-                      <button 
-                        onClick={() => handleQtyChange(qty + 1)}
-                        disabled={qty >= stock}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--text-primary)',
-                          width: '28px',
-                          height: '28px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          opacity: qty >= stock ? 0.3 : 1
-                        }}
-                      >
-                        <Plus size={12} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleAddToCart}
-                  disabled={isOutOfStock}
-                  className={`btn ${added ? 'btn-success' : 'btn-primary'}`}
-                  style={{
-                    width: '100%',
-                    fontSize: '11px',
-                  }}
-                >
-                  {added ? (
-                    <>
-                      <Check size={16} /> Agregado
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag size={16} /> {isOutOfStock ? 'Agotado' : 'Añadir al Carrito'}
-                    </>
-                  )}
-                </button>
-              </>
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      opacity: qty <= 1 ? 0.3 : 1
+                    }}
+                  >
+                    <Minus size={12} />
+                  </button>
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    width: '32px',
+                    textAlign: 'center'
+                  }}>
+                    {qty}
+                  </span>
+                  <button 
+                    onClick={() => handleQtyChange(qty + 1)}
+                    disabled={qty >= stock}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-primary)',
+                      width: '28px',
+                      height: '28px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      opacity: qty >= stock ? 0.3 : 1
+                    }}
+                  >
+                    <Plus size={12} />
+                  </button>
+                </div>
+              </div>
             )}
+
+            <button
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+              className={`btn ${added ? 'btn-success' : 'btn-primary'}`}
+              style={{
+                width: '100%',
+                fontSize: '11px',
+              }}
+            >
+              {added ? (
+                <>
+                  <Check size={16} /> Agregado
+                </>
+              ) : (
+                <>
+                  <ShoppingBag size={16} /> {isOutOfStock ? 'Agotado' : 'Añadir al Carrito'}
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
