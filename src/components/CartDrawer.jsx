@@ -7,12 +7,11 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
 
   if (!isOpen) return null;
 
-  // Format currency (e.g. $35.000,00)
   const formatPrice = (val) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 2
+      minimumFractionDigits: 0
     }).format(val);
   };
 
@@ -27,7 +26,7 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
       display: 'flex',
       justifyContent: 'flex-end',
     }}>
-      {/* Backdrop */}
+      {/* Backdrop overlay */}
       <div 
         onClick={onClose}
         style={{
@@ -36,7 +35,7 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(9, 13, 22, 0.7)',
+          background: 'rgba(0, 0, 0, 0.3)',
           backdropFilter: 'blur(4px)',
           animation: 'fadeInOverlay 0.2s ease-out'
         }}
@@ -51,11 +50,12 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
           maxWidth: '440px',
           height: '100%',
           borderRadius: 0,
-          borderLeft: '1px solid var(--border-color)',
+          border: 'none',
+          borderLeft: '1px solid var(--outline-variant)',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '-10px 0 30px rgba(0, 0, 0, 0.5)',
-          background: 'var(--bg-secondary)',
+          boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.05)',
+          background: 'var(--bg-primary)',
           animation: 'slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
           zIndex: 1001,
         }}
@@ -63,22 +63,23 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
         {/* Header */}
         <div style={{
           padding: '20px 24px',
-          borderBottom: '1px solid var(--border-color)',
+          borderBottom: '1px solid var(--outline-variant)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShoppingBag size={20} className="text-secondary" />
-            <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Mi Carrito</h2>
+            <ShoppingBag size={18} />
+            <h2 style={{ fontSize: '16px', fontWeight: 700, letterSpacing: '-0.01em' }}>Mi Carrito</h2>
             <span style={{
-              background: 'rgba(255,255,255,0.06)',
+              background: 'var(--surface-container-high)',
               padding: '2px 8px',
               borderRadius: '20px',
-              fontSize: '12px',
+              fontSize: '11px',
+              fontWeight: 600,
               color: 'var(--text-secondary)'
             }}>
-              {cartCount} {cartCount === 1 ? 'item' : 'items'}
+              {cartCount}
             </span>
           </div>
           <button 
@@ -95,7 +96,7 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
               borderRadius: '8px'
             }}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
@@ -118,14 +119,14 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
               gap: '12px',
               color: 'var(--text-secondary)'
             }}>
-              <span style={{ fontSize: '48px' }}>🛒</span>
-              <p style={{ fontWeight: 500 }}>Tu carrito está vacío</p>
+              <ShoppingBag size={32} style={{ strokeWidth: 1.5, color: 'var(--text-muted)' }} />
+              <p style={{ fontWeight: 600, fontSize: '14px' }}>El carrito está vacío</p>
               <button 
                 onClick={onClose}
                 className="btn btn-secondary"
-                style={{ fontSize: '13px', padding: '10px 16px', minHeight: 'auto' }}
+                style={{ fontSize: '11px', padding: '10px 16px', minHeight: 'auto' }}
               >
-                Volver a la tienda
+                Volver al catálogo
               </button>
             </div>
           ) : (
@@ -136,28 +137,32 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
                   display: 'flex',
                   gap: '12px',
                   paddingBottom: '16px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                  borderBottom: '1px solid var(--surface-container-high)',
                   alignItems: 'center'
                 }}
               >
-                {/* Visual ID representation fallback gradient */}
+                {/* Visual fallback container */}
                 <div style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '10px',
-                  background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '8px',
+                  background: 'var(--surface-container-low)',
+                  border: '1px solid var(--outline-variant)',
                   flexShrink: 0,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px'
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                  color: 'var(--text-muted)'
                 }}>
-                  ⌚
+                  RELOJ
                 </div>
 
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   <h4 style={{
-                    fontSize: '14px',
+                    fontSize: '13px',
                     fontWeight: 600,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
@@ -180,9 +185,9 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      background: 'rgba(255,255,255,0.05)',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color)',
+                      background: 'var(--surface-container-low)',
+                      borderRadius: '6px',
+                      border: '1px solid var(--outline-variant)',
                       padding: '2px'
                     }}>
                       <button 
@@ -191,20 +196,20 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
                           background: 'none',
                           border: 'none',
                           color: 'var(--text-primary)',
-                          width: '24px',
-                          height: '24px',
+                          width: '20px',
+                          height: '20px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           cursor: 'pointer'
                         }}
                       >
-                        <Minus size={12} />
+                        <Minus size={10} />
                       </button>
                       <span style={{
-                        fontSize: '13px',
+                        fontSize: '12px',
                         fontWeight: 600,
-                        width: '28px',
+                        width: '24px',
                         textAlign: 'center'
                       }}>
                         {item.quantity}
@@ -215,26 +220,25 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
                           background: 'none',
                           border: 'none',
                           color: 'var(--text-primary)',
-                          width: '24px',
-                          height: '24px',
+                          width: '20px',
+                          height: '20px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           cursor: 'pointer'
                         }}
                       >
-                        <Plus size={12} />
+                        <Plus size={10} />
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
                   <span style={{
-                    fontSize: '14px',
+                    fontSize: '13px',
                     fontWeight: 700,
-                    color: 'var(--text-primary)',
-                    fontFamily: 'var(--font-title)'
+                    color: 'var(--text-primary)'
                   }}>
                     {formatPrice(item.product.price * item.quantity)}
                   </span>
@@ -243,14 +247,14 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: 'var(--text-cancelled)',
+                      color: 'var(--color-cancelled)',
                       cursor: 'pointer',
-                      opacity: 0.7,
-                      padding: '4px'
+                      opacity: 0.8,
+                      padding: '2px'
                     }}
-                    title="Eliminar ítem"
+                    title="Eliminar"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
@@ -258,27 +262,26 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
           )}
         </div>
 
-        {/* Footer with totals */}
+        {/* Footer with total */}
         {cart.length > 0 && (
           <div style={{
-            padding: '24px',
-            borderTop: '1px solid var(--border-color)',
-            background: 'rgba(9, 13, 22, 0.4)',
+            padding: '20px 24px',
+            borderTop: '1px solid var(--outline-variant)',
+            background: 'var(--surface-container-low)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '16px'
+            gap: '14px'
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: '14px', fontWeight: 500 }}>Total Compra</span>
+              <span className="label-caps" style={{ fontSize: '10px' }}>Total Estimado</span>
               <span style={{
-                fontSize: '22px',
-                fontWeight: 800,
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-title)'
+                fontSize: '18px',
+                fontWeight: 700,
+                color: 'var(--primary)',
               }}>
                 {formatPrice(cartTotal)}
               </span>
@@ -292,7 +295,7 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
               className="btn btn-primary"
               style={{
                 width: '100%',
-                fontSize: '15px'
+                fontSize: '12px'
               }}
             >
               Continuar Compra

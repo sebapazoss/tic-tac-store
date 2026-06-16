@@ -19,7 +19,6 @@ const Register = ({ onNavigate }) => {
     setError('');
     setSuccess('');
 
-    // Client side validations
     if (!name || !email || !password || !passwordConfirmation) {
       setError('Por favor, completa todos los campos.');
       return;
@@ -40,26 +39,23 @@ const Register = ({ onNavigate }) => {
       const response = await register(name, email, password, passwordConfirmation, role);
       
       if (role === 'vendedor') {
-        setSuccess('¡Registro exitoso! Tu cuenta de vendedor ha sido registrada y está pendiente de aprobación por el Administrador antes de que puedas publicar productos.');
-        // Reset form
+        setSuccess('Registro exitoso. Tu cuenta de vendedor ha sido registrada y está pendiente de aprobación por el Administrador antes de que puedas publicar relojes.');
         setName('');
         setEmail('');
         setPassword('');
         setPasswordConfirmation('');
       } else {
-        // Customers are logged in automatically on success
         onNavigate('catalog');
       }
     } catch (err) {
       console.error(err);
       if (err.response && err.response.data && err.response.data.errors) {
-        // Collect and display Laravel validator errors
         const validationErrors = Object.values(err.response.data.errors).flat().join(' ');
         setError(validationErrors);
       } else if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
       } else {
-        setError('Ocurrió un error al procesar el registro. Intenta con otro correo electrónico.');
+        setError('Error al procesar el registro. Intenta con otro correo electrónico.');
       }
     } finally {
       setLoading(false);
@@ -72,52 +68,55 @@ const Register = ({ onNavigate }) => {
         padding: '32px 24px',
         maxWidth: '440px',
         margin: '20px auto 0 auto',
-        textAlign: 'center'
+        textAlign: 'center',
+        background: '#ffffff',
+        border: '1px solid var(--outline-variant)'
       }}>
-        <span style={{ fontSize: '48px', marginBottom: '16px', display: 'block' }}>🎮</span>
         <h2 style={{
-          fontSize: '24px',
-          fontFamily: 'var(--font-title)',
-          marginBottom: '8px'
+          fontSize: '20px',
+          fontWeight: 700,
+          marginBottom: '8px',
+          letterSpacing: '-0.01em'
         }}>
           Crear Cuenta
         </h2>
         <p style={{
-          fontSize: '14px',
+          fontSize: '13px',
           color: 'var(--text-secondary)',
           marginBottom: '24px'
         }}>
-          Únete a Tic-Tac Store y empieza a operar
+          Únete a Horology y empieza a operar
         </p>
 
         {error && (
           <div style={{
             background: 'var(--color-cancelled-bg)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '12px',
+            border: '1px solid var(--color-cancelled)',
+            borderRadius: '10px',
             padding: '12px 16px',
-            color: '#fca5a5',
+            color: 'var(--color-cancelled)',
             fontSize: '13px',
             marginBottom: '20px',
             textAlign: 'left'
           }}>
-            ⚠️ {error}
+            {error}
           </div>
         )}
 
         {success && (
           <div style={{
             background: 'var(--color-delivered-bg)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: '12px',
+            border: '1px solid var(--color-delivered)',
+            borderRadius: '10px',
             padding: '16px',
-            color: '#a7f3d0',
-            fontSize: '14px',
+            color: 'var(--color-delivered)',
+            fontSize: '13px',
             marginBottom: '20px',
             textAlign: 'left',
-            lineHeight: 1.4
+            lineHeight: 1.4,
+            fontWeight: 500
           }}>
-            🎉 {success}
+            {success}
             <button
               onClick={() => onNavigate('login')}
               className="btn btn-success"
@@ -126,10 +125,10 @@ const Register = ({ onNavigate }) => {
                 marginTop: '12px',
                 minHeight: 'auto',
                 padding: '8px 12px',
-                fontSize: '13px'
+                fontSize: '11px'
               }}
             >
-              Ir a Iniciar Sesión
+              Iniciar Sesión
             </button>
           </div>
         )}
@@ -183,9 +182,10 @@ const Register = ({ onNavigate }) => {
                   color: 'var(--color-pending)',
                   marginTop: '6px',
                   textAlign: 'left',
-                  lineHeight: 1.3
+                  lineHeight: 1.3,
+                  fontWeight: 500
                 }}>
-                  ⚠️ Las cuentas de vendedor requieren la aprobación de un administrador antes de poder publicar y editar productos.
+                  Nota: Las cuentas de vendedor requieren la aprobación de un administrador para poder listar relojes en la tienda.
                 </p>
               )}
             </div>
@@ -221,24 +221,24 @@ const Register = ({ onNavigate }) => {
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ width: '100%', marginBottom: '20px' }}
+              style={{ width: '100%', marginBottom: '20px', fontSize: '11px' }}
               disabled={loading}
             >
-              {loading ? 'Creando cuenta...' : 'Registrarme'}
+              {loading ? 'Registrando...' : 'Registrarme'}
             </button>
           </form>
         )}
 
         <p style={{
-          fontSize: '13px',
+          fontSize: '12px',
           color: 'var(--text-secondary)'
         }}>
           ¿Ya tienes cuenta?{' '}
           <span
             onClick={() => onNavigate('login')}
             style={{
-              color: 'var(--primary)',
-              fontWeight: 600,
+              color: 'var(--secondary)',
+              fontWeight: 700,
               cursor: 'pointer',
               textDecoration: 'underline'
             }}

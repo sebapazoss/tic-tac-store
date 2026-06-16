@@ -1,26 +1,27 @@
 import React from 'react';
-import { ShoppingBag, User, LogOut } from 'lucide-react';
+import { ShoppingBag, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
 const Navbar = ({ onCartToggle, onNavigate }) => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { cartCount } = useCart();
 
   return (
     <header className="glass-card" style={{
       position: 'sticky',
-      top: 12,
+      top: 0,
       zIndex: 100,
-      margin: '12px 12px 0 12px',
-      borderRadius: '16px',
-      padding: '12px 16px',
+      borderRadius: 0,
+      border: 'none',
+      borderBottom: '1px solid var(--surface-container-highest)',
+      padding: '14px 20px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-primary)'
     }}>
-      {/* Logo */}
+      {/* Brand Logo */}
       <div 
         onClick={() => onNavigate('catalog')} 
         style={{
@@ -31,90 +32,88 @@ const Navbar = ({ onCartToggle, onNavigate }) => {
         }}
       >
         <span style={{
-          fontSize: '22px',
-          fontWeight: 800,
-          fontFamily: 'var(--font-title)',
-          background: 'linear-gradient(135deg, #a855f7, #6366f1)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
+          fontSize: '20px',
+          fontWeight: 700,
+          letterSpacing: '-0.02em',
+          color: 'var(--primary)',
         }}>
-          Tic-Tac Store
+          HOROLOGY
         </span>
-        <span style={{ fontSize: '18px' }}>🕹️</span>
       </div>
 
-      {/* Acciones */}
+      {/* Action Buttons */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        {/* Carrito */}
+        {/* Shopping Cart Button */}
         <button 
           onClick={onCartToggle}
           className="btn btn-secondary"
           style={{
             position: 'relative',
-            width: '44px',
-            height: '44px',
+            width: '40px',
+            height: '40px',
             padding: 0,
-            borderRadius: '12px',
+            borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             minWidth: 'auto',
             minHeight: 'auto',
+            background: 'var(--surface-container-low)'
           }}
           aria-label="Ver carrito"
         >
-          <ShoppingBag size={20} />
+          <ShoppingBag size={18} />
           {cartCount > 0 && (
             <span style={{
               position: 'absolute',
-              top: '-6px',
-              right: '-6px',
-              background: 'linear-gradient(135deg, var(--accent), var(--primary))',
+              top: '-4px',
+              right: '-4px',
+              backgroundColor: 'var(--primary)',
               color: '#ffffff',
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 'bold',
-              minWidth: '20px',
-              height: '20px',
-              borderRadius: '10px',
+              minWidth: '18px',
+              height: '18px',
+              borderRadius: '9px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '0 4px',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-              animation: 'pop 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
             }}>
               {cartCount}
             </span>
           )}
         </button>
 
-        {/* Perfil / Login */}
+        {/* User Session Profile Link */}
         {user ? (
           <div 
             onClick={() => onNavigate('profile')}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              padding: '6px 12px',
-              borderRadius: '12px',
+              gap: '6px',
+              background: 'var(--surface-container-low)',
+              padding: '8px 12px',
+              borderRadius: '10px',
               cursor: 'pointer',
-              border: '1px solid var(--border-color)',
+              border: '1px solid var(--outline-variant)',
               transition: 'background-color 0.2s ease',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--surface-container-high)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--surface-container-low)'}
           >
-            <User size={18} className="text-secondary" />
+            <User size={16} />
             <span style={{
-              fontSize: '13px',
-              fontWeight: 500,
+              fontSize: '12px',
+              fontWeight: 600,
               maxWidth: '80px',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              color: 'var(--text-primary)'
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
             }}>
               {user.name.split(' ')[0]}
             </span>
@@ -126,21 +125,14 @@ const Navbar = ({ onCartToggle, onNavigate }) => {
             style={{
               padding: '8px 16px',
               minHeight: 'auto',
-              fontSize: '13px',
-              borderRadius: '12px',
+              fontSize: '11px',
+              borderRadius: '10px',
             }}
           >
-            Iniciar Sesión
+            Ingresar
           </button>
         )}
       </div>
-      
-      <style>{`
-        @keyframes pop {
-          0% { transform: scale(0.6); }
-          100% { transform: scale(1); }
-        }
-      `}</style>
     </header>
   );
 };

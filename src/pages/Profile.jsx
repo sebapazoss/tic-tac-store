@@ -7,7 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const Profile = ({ onNavigate }) => {
   const { user, logout, refreshUser } = useAuth();
   
-  // Tab states for administrative roles
+  // Tab states for administrative views
   const [adminTab, setAdminTab] = useState('profile'); // 'profile', 'products', 'sellers'
   
   // Product CRUD states
@@ -34,13 +34,10 @@ const Profile = ({ onNavigate }) => {
   const isAdmin = user && user.role === 'admin';
   const isApproved = user && user.status === 'approved';
 
-  // Load seller's own products or general products for CRUD
   const fetchSellersProducts = useCallback(async () => {
     if (!user || (!isApproved && !isAdmin)) return;
     setProductsLoading(true);
     try {
-      // Fetch products. Note: standard GET /products handles filtering. 
-      // Vendedors and Admins see their items. Since Laravel backend has /products endpoint, we fetch the first page.
       const response = await api.get('/products');
       if (response.data && response.data.data) {
         setProducts(response.data.data);
@@ -54,12 +51,10 @@ const Profile = ({ onNavigate }) => {
     }
   }, [user, isApproved, isAdmin]);
 
-  // Load pending seller accounts
   const fetchSellers = useCallback(async () => {
     if (!isAdmin) return;
     setSellersLoading(true);
     try {
-      // GET /admin/users?status=pending
       const response = await api.get('/admin/users', { params: { status: 'pending' } });
       setSellers(response.data || []);
     } catch (err) {
@@ -69,7 +64,6 @@ const Profile = ({ onNavigate }) => {
     }
   }, [isAdmin]);
 
-  // Initial load
   useEffect(() => {
     if (adminTab === 'products') {
       fetchSellersProducts();
@@ -78,7 +72,6 @@ const Profile = ({ onNavigate }) => {
     }
   }, [adminTab, fetchSellersProducts, fetchSellers]);
 
-  // Check profile updates on mount
   useEffect(() => {
     if (user) {
       refreshUser();
@@ -112,7 +105,7 @@ const Profile = ({ onNavigate }) => {
     setFormError('');
 
     if (!pName || !pPrice || !pStock || !pBrand) {
-      setFormError('Por favor, completa todos los campos requeridos (*).');
+      setFormError('Por favor, completa los campos obligatorios.');
       return;
     }
 
@@ -128,10 +121,8 @@ const Profile = ({ onNavigate }) => {
     setFormLoading(true);
     try {
       if (currentProduct) {
-        // Edit product (PUT /products/{product})
         await api.put(`/products/${currentProduct.id}`, payload);
       } else {
-        // Create product (POST /products)
         await api.post('/products', payload);
       }
       setShowProductModal(false);
@@ -141,7 +132,7 @@ const Profile = ({ onNavigate }) => {
       if (err.response && err.response.data && err.response.data.message) {
         setFormError(err.response.data.message);
       } else {
-        setFormError('Error al guardar el producto. Verifica los datos ingresados.');
+        setFormError('Error al procesar el guardado. Verifica los datos.');
       }
     } finally {
       setFormLoading(false);
@@ -149,22 +140,21 @@ const Profile = ({ onNavigate }) => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
+    if (!window.confirm('¿Deseas eliminar este producto?')) return;
     try {
       await api.delete(`/products/${productId}`);
       fetchSellersProducts();
     } catch (err) {
       console.error(err);
-      alert('Error al intentar eliminar el producto.');
+      alert('Error al eliminar el producto.');
     }
   };
 
-  // Seller approval handlers (Admin only)
   const handleApproveSeller = async (userId) => {
     try {
       await api.patch(`/admin/users/${userId}/approve`);
       setSellers(prev => prev.filter(seller => seller.id !== userId));
-      alert('Vendedor aprobado con éxito.');
+      alert('Vendedor aprobado.');
     } catch (err) {
       console.error(err);
       alert('Error al intentar aprobar al vendedor.');
@@ -172,7 +162,7 @@ const Profile = ({ onNavigate }) => {
   };
 
   const handleRejectSeller = async (userId) => {
-    if (!window.confirm('¿Estás seguro de que deseas rechazar la solicitud de este vendedor?')) return;
+    if (!window.confirm('¿Rechazar solicitud?')) return;
     try {
       await api.patch(`/admin/users/${userId}/reject`);
       setSellers(prev => prev.filter(seller => seller.id !== userId));
@@ -183,13 +173,13 @@ const Profile = ({ onNavigate }) => {
   };
 
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm('¿Estás seguro de eliminar esta cuenta permanentemente?')) return;
+    if (!window.confirm('¿Eliminar usuario permanentemente?')) return;
     try {
       await api.delete(`/admin/users/${userId}`);
       setSellers(prev => prev.filter(seller => seller.id !== userId));
     } catch (err) {
       console.error(err);
-      alert('Error al eliminar la cuenta.');
+      alert('Error al eliminar.');
     }
   };
 
@@ -197,7 +187,7 @@ const Profile = ({ onNavigate }) => {
     return (
       <div className="glass-card" style={{ padding: '40px 24px', textAlign: 'center', marginTop: '40px' }}>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
-          Inicia sesión para ver tu perfil.
+          Inicia sesión para configurar tu perfil.
         </p>
         <button onClick={() => onNavigate('login')} className="btn btn-primary">
           Ir a Login
@@ -209,29 +199,30 @@ const Profile = ({ onNavigate }) => {
   return (
     <div className="fade-in" style={{ paddingBottom: '32px' }}>
       
-      {/* Tab Navigation header for admin/seller */}
+      {/* Dynamic Tab Navigation headers */}
       {(isAdmin || (isSeller && isApproved)) && (
-        <div className="glass-card" style={{
+        <div style={{
           display: 'flex',
-          padding: '6px',
+          background: 'var(--surface-container-low)',
+          padding: '4px',
           marginBottom: '20px',
-          borderRadius: '12px',
-          border: '1px solid var(--border-color)',
-          background: 'rgba(255,255,255,0.02)'
+          borderRadius: '10px',
+          border: '1px solid var(--outline-variant)'
         }}>
           <button
             onClick={() => setAdminTab('profile')}
+            className="label-caps"
             style={{
               flex: 1,
               background: adminTab === 'profile' ? 'var(--primary)' : 'none',
               border: 'none',
               color: adminTab === 'profile' ? '#fff' : 'var(--text-secondary)',
-              padding: '8px',
+              padding: '8px 10px',
               borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 600,
+              fontSize: '10px',
+              fontWeight: 700,
               cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.15s ease'
             }}
           >
             Perfil
@@ -239,36 +230,38 @@ const Profile = ({ onNavigate }) => {
           
           <button
             onClick={() => setAdminTab('products')}
+            className="label-caps"
             style={{
               flex: 1,
               background: adminTab === 'products' ? 'var(--primary)' : 'none',
               border: 'none',
               color: adminTab === 'products' ? '#fff' : 'var(--text-secondary)',
-              padding: '8px',
+              padding: '8px 10px',
               borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 600,
+              fontSize: '10px',
+              fontWeight: 700,
               cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.15s ease'
             }}
           >
-            Mi Catálogo
+            Catálogo
           </button>
 
           {isAdmin && (
             <button
               onClick={() => setAdminTab('sellers')}
+              className="label-caps"
               style={{
                 flex: 1,
                 background: adminTab === 'sellers' ? 'var(--primary)' : 'none',
                 border: 'none',
                 color: adminTab === 'sellers' ? '#fff' : 'var(--text-secondary)',
-                padding: '8px',
+                padding: '8px 10px',
                 borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 600,
+                fontSize: '10px',
+                fontWeight: 700,
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.15s ease'
               }}
             >
               Aprobaciones
@@ -277,90 +270,89 @@ const Profile = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* VIEW A: PROFILE DETAIL */}
+      {/* VIEW A: PROFILE */}
       {adminTab === 'profile' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="glass-card" style={{ padding: '24px', textAlign: 'center' }}>
+          <div className="glass-card" style={{ padding: '24px', textAlign: 'center', background: '#ffffff' }}>
             <div style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '40px',
-              background: 'linear-gradient(135deg, var(--accent), var(--primary))',
+              width: '72px',
+              height: '72px',
+              borderRadius: '50%',
+              background: 'var(--surface-container-low)',
+              border: '1px solid var(--outline-variant)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '32px',
-              marginBottom: '16px'
+              marginBottom: '16px',
+              color: 'var(--primary)'
             }}>
-              ⌚
+              <User size={32} style={{ strokeWidth: 1.5 }} />
             </div>
 
-            <h3 style={{ fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-title)' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '-0.01em' }}>
               {user.name}
             </h3>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
               {user.email}
             </p>
 
-            {/* Role indicator badges */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
               {isAdmin ? (
                 <span className="badge badge-delivered" style={{ display: 'inline-flex', gap: '4px' }}>
-                  <Award size={12} /> Admin
+                  <Award size={10} /> Admin
                 </span>
               ) : isSeller ? (
                 <>
                   <span className="badge badge-processing" style={{ display: 'inline-flex', gap: '4px' }}>
-                    <FileSpreadsheet size={12} /> Vendedor
+                    <FileSpreadsheet size={10} /> Vendedor
                   </span>
                   {isApproved ? (
                     <span className="badge badge-delivered">Aprobado</span>
                   ) : (
-                    <span className="badge badge-pending">Pendiente Aprobación</span>
+                    <span className="badge badge-pending">Pendiente</span>
                   )}
                 </>
               ) : (
-                <span className="badge badge-shipped">Cliente Comprador</span>
+                <span className="badge badge-shipped">Cliente</span>
               )}
             </div>
 
             <button 
               onClick={logout} 
               className="btn btn-danger"
-              style={{ width: '100%', maxWidth: '200px' }}
+              style={{ width: '100%', maxWidth: '200px', fontSize: '10px' }}
             >
-              <LogOut size={16} /> Cerrar Sesión
+              <LogOut size={14} /> Cerrar Sesión
             </button>
           </div>
 
-          {/* Pending warning banner for unapproved sellers */}
+          {/* Pending notification */}
           {isSeller && !isApproved && (
             <div className="glass-card" style={{
               padding: '20px',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
-              background: 'var(--color-pending-bg)',
+              border: '1px solid var(--outline-variant)',
+              background: 'var(--surface-container-low)',
               textAlign: 'left'
             }}>
-              <h4 style={{
+              <h4 className="label-caps" style={{
                 color: 'var(--color-pending)',
-                fontWeight: 700,
-                fontSize: '15px',
+                fontSize: '11px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 marginBottom: '8px'
               }}>
-                <ShieldAlert size={18} /> Cuenta en Revisión
+                <ShieldAlert size={16} /> Cuenta en proceso de revisión
               </h4>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                Tu solicitud de vendedor aún no ha sido aprobada por la administración de Tic-Tac Store. Podrás acceder a la publicación y edición de relojes en cuanto un administrador verifique tu cuenta.
+                Tu solicitud de vendedor aún no ha sido aprobada por la administración. Podrás acceder a la gestión del catálogo de relojes una vez aprobada.
               </p>
             </div>
           )}
         </div>
       )}
 
-      {/* VIEW B: PRODUCTS CRUD MANAGER */}
+      {/* VIEW B: PRODUCTS CRUD */}
       {adminTab === 'products' && (
         <div className="fade-in">
           <div style={{
@@ -369,13 +361,13 @@ const Profile = ({ onNavigate }) => {
             alignItems: 'center',
             marginBottom: '16px'
           }}>
-            <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Gestión de Catálogo</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Gestión de Relojes</h3>
             <button 
               onClick={() => handleOpenProductModal()}
               className="btn btn-primary"
-              style={{ padding: '8px 12px', fontSize: '12px', minHeight: 'auto', borderRadius: '8px' }}
+              style={{ padding: '6px 12px', fontSize: '10px', minHeight: 'auto', borderRadius: '8px' }}
             >
-              <Plus size={14} /> Agregar Producto
+              <Plus size={12} /> Agregar
             </button>
           </div>
 
@@ -383,7 +375,7 @@ const Profile = ({ onNavigate }) => {
             <LoadingSpinner />
           ) : products.length === 0 ? (
             <div className="glass-card" style={{ padding: '40px 24px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              <p>No tienes productos publicados todavía.</p>
+              <p style={{ fontSize: '13px' }}>No hay relojes publicados.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -396,13 +388,14 @@ const Profile = ({ onNavigate }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    border: '1px solid var(--border-color)',
-                    fontSize: '14px'
+                    border: '1px solid var(--outline-variant)',
+                    fontSize: '13px',
+                    background: '#ffffff'
                   }}
                 >
                   <div style={{ textAlign: 'left', minWidth: 0, flex: 1, paddingRight: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                      <span className="badge badge-shipped" style={{ fontSize: '8px', padding: '2px 6px' }}>{product.brand}</span>
+                      <span className="label-caps" style={{ fontSize: '8px', color: 'var(--text-secondary)' }}>{product.brand}</span>
                       <strong style={{
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
@@ -410,8 +403,8 @@ const Profile = ({ onNavigate }) => {
                         display: 'block'
                       }}>{product.name}</strong>
                     </div>
-                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Precio: {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(product.price)} | Stock: {product.stock}
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                      Precio: {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(product.price)} | Stock: {product.stock}
                     </span>
                   </div>
 
@@ -419,18 +412,18 @@ const Profile = ({ onNavigate }) => {
                     <button 
                       onClick={() => handleOpenProductModal(product)}
                       className="btn btn-secondary"
-                      style={{ padding: 0, width: '32px', height: '32px', minWidth: 'auto', minHeight: 'auto', borderRadius: '6px' }}
+                      style={{ padding: 0, width: '28px', height: '28px', minWidth: 'auto', minHeight: 'auto', borderRadius: '6px' }}
                       title="Editar"
                     >
-                      <Edit size={14} />
+                      <Edit size={12} />
                     </button>
                     <button 
                       onClick={() => handleDeleteProduct(product.id)}
                       className="btn btn-danger"
-                      style={{ padding: 0, width: '32px', height: '32px', minWidth: 'auto', minHeight: 'auto', borderRadius: '6px' }}
+                      style={{ padding: 0, width: '28px', height: '28px', minWidth: 'auto', minHeight: 'auto', borderRadius: '6px' }}
                       title="Eliminar"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={12} />
                     </button>
                   </div>
                 </div>
@@ -440,18 +433,18 @@ const Profile = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* VIEW C: SELLER APPROVALS (ADMIN ONLY) */}
+      {/* VIEW C: SELLER APPROVALS (ADMIN) */}
       {adminTab === 'sellers' && (
         <div className="fade-in">
-          <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', textAlign: 'left' }}>
-            Solicitudes de Vendedor
+          <h3 className="label-caps" style={{ fontSize: '10px', marginBottom: '16px', textAlign: 'left' }}>
+            Solicitudes pendientes
           </h3>
 
           {sellersLoading ? (
             <LoadingSpinner />
           ) : sellers.length === 0 ? (
             <div className="glass-card" style={{ padding: '40px 24px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              <p>No hay solicitudes pendientes de vendedor en este momento.</p>
+              <p style={{ fontSize: '13px' }}>No hay solicitudes de aprobación.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -461,48 +454,49 @@ const Profile = ({ onNavigate }) => {
                   className="glass-card"
                   style={{
                     padding: '16px',
-                    border: '1px solid var(--border-color)',
+                    border: '1px solid var(--outline-variant)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '12px',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    background: '#ffffff'
                   }}
                 >
                   <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: 700 }}>{seller.name}</h4>
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{seller.email}</p>
-                    <span className="badge badge-pending" style={{ marginTop: '6px', fontSize: '9px' }}>
-                      Pendiente aprobación
+                    <h4 style={{ fontSize: '13px', fontWeight: 700 }}>{seller.name}</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{seller.email}</p>
+                    <span className="badge badge-pending" style={{ marginTop: '6px', fontSize: '8px' }}>
+                      Pendiente
                     </span>
                   </div>
 
                   <div style={{
                     display: 'flex',
                     gap: '8px',
-                    borderTop: '1px solid rgba(255,255,255,0.05)',
+                    borderTop: '1px solid var(--surface-container-highest)',
                     paddingTop: '10px'
                   }}>
                     <button
                       onClick={() => handleApproveSeller(seller.id)}
                       className="btn btn-success"
-                      style={{ flex: 1, fontSize: '11px', padding: '6px', minHeight: 'auto', borderRadius: '6px' }}
+                      style={{ flex: 1, fontSize: '10px', padding: '6px', minHeight: 'auto', borderRadius: '6px' }}
                     >
-                      <Check size={14} /> Aprobar
+                      <Check size={12} /> Aprobar
                     </button>
                     <button
                       onClick={() => handleRejectSeller(seller.id)}
                       className="btn btn-danger"
-                      style={{ flex: 1, fontSize: '11px', padding: '6px', minHeight: 'auto', borderRadius: '6px' }}
+                      style={{ flex: 1, fontSize: '10px', padding: '6px', minHeight: 'auto', borderRadius: '6px' }}
                     >
-                      <X size={14} /> Rechazar
+                      <X size={12} /> Rechazar
                     </button>
                     <button
                       onClick={() => handleDeleteUser(seller.id)}
                       className="btn btn-secondary"
-                      style={{ padding: '6px 10px', minHeight: 'auto', borderRadius: '6px' }}
-                      title="Eliminar del sistema"
+                      style={{ padding: '6px 8px', minHeight: 'auto', borderRadius: '6px' }}
+                      title="Eliminar"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={12} />
                     </button>
                   </div>
                 </div>
@@ -512,7 +506,7 @@ const Profile = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Product ADD/EDIT Modal overlay */}
+      {/* Product Modal Overlay */}
       {showProductModal && (
         <div style={{
           position: 'fixed',
@@ -526,7 +520,6 @@ const Profile = ({ onNavigate }) => {
           justifyContent: 'center',
           padding: '16px'
         }}>
-          {/* Backdrop blur */}
           <div 
             onClick={() => !formLoading && setShowProductModal(false)}
             style={{
@@ -535,7 +528,7 @@ const Profile = ({ onNavigate }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'rgba(9, 13, 22, 0.7)',
+              background: 'rgba(0, 0, 0, 0.3)',
               backdropFilter: 'blur(4px)',
             }}
           />
@@ -549,38 +542,35 @@ const Profile = ({ onNavigate }) => {
               maxHeight: '90vh',
               overflowY: 'auto',
               padding: '24px',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
+              background: '#ffffff',
+              border: '1px solid var(--outline-variant)',
               zIndex: 1001
             }}
           >
             <h3 style={{
-              fontSize: '18px',
+              fontSize: '16px',
               fontWeight: 700,
               marginBottom: '16px',
               textAlign: 'left'
             }}>
-              {currentProduct ? 'Editar Reloj' : 'Agregar Nuevo Reloj'}
+              {currentProduct ? 'Editar Reloj' : 'Agregar Reloj'}
             </h3>
 
             {formError && (
               <div style={{
                 background: 'var(--color-cancelled-bg)',
-                color: '#fca5a5',
+                color: 'var(--color-cancelled)',
                 fontSize: '12px',
                 padding: '10px 12px',
                 borderRadius: '8px',
                 marginBottom: '12px',
                 textAlign: 'left'
               }}>
-                ⚠️ {formError}
+                {formError}
               </div>
             )}
 
-            <form onSubmit={formSave => {
-              // Standard form submission is handled in helper function
-              handleSaveProduct(formSave);
-            }}>
+            <form onSubmit={handleSaveProduct}>
               <div className="form-group">
                 <label>Marca *</label>
                 <input
@@ -595,11 +585,11 @@ const Profile = ({ onNavigate }) => {
               </div>
 
               <div className="form-group">
-                <label>Nombre del Producto *</label>
+                <label>Nombre del Reloj *</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="Ej. Reloj Casio Vintage A158W"
+                  placeholder="Ej. Patrimony Manual"
                   value={pName}
                   onChange={(e) => setPName(e.target.value)}
                   disabled={formLoading}
@@ -613,7 +603,7 @@ const Profile = ({ onNavigate }) => {
                   type="number"
                   step="0.01"
                   className="form-input"
-                  placeholder="Ej. 35000.00"
+                  placeholder="Monto"
                   value={pPrice}
                   onChange={(e) => setPPrice(e.target.value)}
                   disabled={formLoading}
@@ -626,7 +616,7 @@ const Profile = ({ onNavigate }) => {
                 <input
                   type="number"
                   className="form-input"
-                  placeholder="Ej. 10"
+                  placeholder="Unidades"
                   value={pStock}
                   onChange={(e) => setPStock(e.target.value)}
                   disabled={formLoading}
@@ -635,7 +625,7 @@ const Profile = ({ onNavigate }) => {
               </div>
 
               <div className="form-group">
-                <label>Enlace de Imagen URL</label>
+                <label>Imagen URL</label>
                 <input
                   type="url"
                   className="form-input"
@@ -650,7 +640,7 @@ const Profile = ({ onNavigate }) => {
                 <label>Descripción</label>
                 <textarea
                   className="form-input"
-                  placeholder="Detalles sobre el diseño, materiales, resistencia al agua..."
+                  placeholder="Detalles técnicos, tipo de correa, cristal..."
                   value={pDescription}
                   onChange={(e) => setPDescription(e.target.value)}
                   disabled={formLoading}
@@ -667,7 +657,7 @@ const Profile = ({ onNavigate }) => {
                   type="button"
                   onClick={() => setShowProductModal(false)}
                   className="btn btn-secondary"
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, fontSize: '11px' }}
                   disabled={formLoading}
                 >
                   Cancelar
@@ -675,7 +665,7 @@ const Profile = ({ onNavigate }) => {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, fontSize: '11px' }}
                   disabled={formLoading}
                 >
                   {formLoading ? 'Guardando...' : 'Guardar'}

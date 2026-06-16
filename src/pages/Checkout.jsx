@@ -17,7 +17,6 @@ const Checkout = ({ onNavigate }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // If user is not logged in, they must login first to perform checkout
   useEffect(() => {
     if (!user) {
       onNavigate('login');
@@ -26,12 +25,11 @@ const Checkout = ({ onNavigate }) => {
 
   if (!user) return null;
 
-  // Format currency (e.g. $35.000,00)
   const formatPrice = (val) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 2
+      minimumFractionDigits: 0
     }).format(val);
   };
 
@@ -40,12 +38,12 @@ const Checkout = ({ onNavigate }) => {
     setError('');
 
     if (cart.length === 0) {
-      setError('Tu carrito está vacío. Agrega algunos productos antes de comprar.');
+      setError('Tu carrito está vacío. Agrega relojes antes de proceder.');
       return;
     }
 
     if (!customerName || !customerEmail || !customerPhone || !shippingAddress) {
-      setError('Por favor, completa todos los campos requeridos.');
+      setError('Por favor, completa los campos obligatorios (*).');
       return;
     }
 
@@ -65,18 +63,17 @@ const Checkout = ({ onNavigate }) => {
 
       await api.post('/orders', orderData);
       
-      // Success! Clear cart and go to Orders list
       clearCart();
-      alert('¡Pedido realizado con éxito! Tu orden ha sido registrada.');
+      alert('Pedido realizado con éxito.');
       onNavigate('orders');
     } catch (err) {
       console.error(err);
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
       } else if (err.response && err.response.status === 422) {
-        setError('Error de validación o stock insuficiente para alguno de los artículos seleccionados.');
+        setError('Error: Stock insuficiente para alguno de los artículos.');
       } else {
-        setError('Ocurrió un error inesperado al procesar tu pedido. Por favor, intenta de nuevo.');
+        setError('Error inesperado al intentar registrar tu pedido.');
       }
     } finally {
       setLoading(false);
@@ -85,29 +82,30 @@ const Checkout = ({ onNavigate }) => {
 
   return (
     <div className="fade-in" style={{ paddingBottom: '40px' }}>
-      {/* Back to Catalog */}
+      {/* Back button */}
       <button 
         onClick={() => onNavigate('catalog')}
         className="btn btn-secondary"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: '6px',
           marginBottom: '20px',
-          padding: '8px 14px',
+          padding: '6px 12px',
           minHeight: 'auto',
-          borderRadius: '10px'
+          borderRadius: '8px',
+          fontSize: '11px'
         }}
       >
-        <ArrowLeft size={16} /> Volver al catálogo
+        <ArrowLeft size={14} /> Volver al catálogo
       </button>
 
       <h2 style={{
-        fontSize: '24px',
-        fontWeight: 800,
-        fontFamily: 'var(--font-title)',
+        fontSize: '20px',
+        fontWeight: 700,
         marginBottom: '20px',
-        textAlign: 'left'
+        textAlign: 'left',
+        letterSpacing: '-0.01em'
       }}>
         Completar Compra
       </h2>
@@ -115,15 +113,15 @@ const Checkout = ({ onNavigate }) => {
       {error && (
         <div style={{
           background: 'var(--color-cancelled-bg)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
-          borderRadius: '12px',
+          border: '1px solid var(--color-cancelled)',
+          borderRadius: '10px',
           padding: '12px 16px',
-          color: '#fca5a5',
+          color: 'var(--color-cancelled)',
           fontSize: '13px',
           marginBottom: '20px',
           textAlign: 'left'
         }}>
-          ⚠️ {error}
+          {error}
         </div>
       )}
 
@@ -132,26 +130,25 @@ const Checkout = ({ onNavigate }) => {
         gridTemplateColumns: '1fr',
         gap: '20px'
       }}>
-        {/* Cart Summary Card */}
-        <div className="glass-card" style={{ padding: '20px' }}>
-          <h3 style={{
-            fontSize: '16px',
-            fontWeight: 700,
+        {/* Cart Summary */}
+        <div className="glass-card" style={{ padding: '20px', background: '#ffffff' }}>
+          <h3 className="label-caps" style={{
+            fontSize: '11px',
             marginBottom: '16px',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            borderBottom: '1px solid var(--border-color)',
-            paddingBottom: '12px'
+            borderBottom: '1px solid var(--outline-variant)',
+            paddingBottom: '10px'
           }}>
-            <ShoppingBag size={18} className="text-secondary" /> Resumen del Pedido
+            <ShoppingBag size={14} /> Resumen de Artículos
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
             {cart.map((item) => (
-              <div key={item.product.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <div key={item.product.id} style={{ display: 'flex', justifyContext: 'space-between', justifyContent: 'space-between', fontSize: '13px' }}>
                 <span style={{ color: 'var(--text-secondary)', textAlign: 'left' }}>
-                  {item.product.name} <strong style={{ color: 'var(--text-primary)' }}>x{item.quantity}</strong>
+                  {item.product.name} <strong style={{ color: 'var(--primary)' }}>x{item.quantity}</strong>
                 </span>
                 <span style={{ fontWeight: 600 }}>
                   {formatPrice(item.product.price * item.quantity)}
@@ -161,37 +158,35 @@ const Checkout = ({ onNavigate }) => {
           </div>
 
           <div style={{
-            borderTop: '1px solid var(--border-color)',
+            borderTop: '1px solid var(--outline-variant)',
             paddingTop: '16px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <span style={{ fontWeight: 600, fontSize: '14px' }}>Total a pagar</span>
+            <span className="label-caps" style={{ fontSize: '10px' }}>Total Final</span>
             <span style={{
-              fontSize: '20px',
-              fontWeight: 800,
+              fontSize: '18px',
+              fontWeight: 700,
               color: 'var(--primary)',
-              fontFamily: 'var(--font-title)'
             }}>
               {formatPrice(cartTotal)}
             </span>
           </div>
         </div>
 
-        {/* Shipping Form Card */}
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <h3 style={{
-            fontSize: '16px',
-            fontWeight: 700,
+        {/* Shipping Form */}
+        <div className="glass-card" style={{ padding: '24px', background: '#ffffff' }}>
+          <h3 className="label-caps" style={{
+            fontSize: '11px',
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            borderBottom: '1px solid var(--border-color)',
-            paddingBottom: '12px'
+            borderBottom: '1px solid var(--outline-variant)',
+            paddingBottom: '10px'
           }}>
-            <CreditCard size={18} className="text-secondary" /> Datos de Envío y Facturación
+            <CreditCard size={14} /> Información de Envío
           </h3>
 
           <form onSubmit={handleSubmit}>
@@ -215,7 +210,7 @@ const Checkout = ({ onNavigate }) => {
                 id="checkout-email"
                 type="email"
                 className="form-input"
-                placeholder="ejemplo@correo.com"
+                placeholder="correo@ejemplo.com"
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 disabled={loading}
@@ -229,7 +224,7 @@ const Checkout = ({ onNavigate }) => {
                 id="checkout-phone"
                 type="tel"
                 className="form-input"
-                placeholder="Ej: +54 9 381 4001234"
+                placeholder="Ej. +54 9 381 4001234"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 disabled={loading}
@@ -252,11 +247,11 @@ const Checkout = ({ onNavigate }) => {
             </div>
 
             <div className="form-group" style={{ marginBottom: '24px' }}>
-              <label htmlFor="checkout-notes">Notas / Instrucciones adicionales</label>
+              <label htmlFor="checkout-notes">Indicaciones Especiales</label>
               <textarea
                 id="checkout-notes"
                 className="form-input"
-                placeholder="Ej. Entregar después de las 18:00 hs, timbre roto..."
+                placeholder="Ej. Dejar en recepción, timbre descompuesto..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 disabled={loading}
@@ -274,7 +269,7 @@ const Checkout = ({ onNavigate }) => {
               style={{ width: '100%' }}
               disabled={loading || cart.length === 0}
             >
-              {loading ? 'Confirmando pedido...' : 'Realizar Pedido'}
+              {loading ? 'Confirmando...' : 'Completar Compra'}
             </button>
           </form>
         </div>

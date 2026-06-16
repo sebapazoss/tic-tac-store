@@ -43,7 +43,6 @@ const Orders = () => {
     setUpdatingId(orderId);
     try {
       await api.patch(`/admin/orders/${orderId}`, { status: newStatus });
-      // Update local state
       setOrders(prevOrders => 
         prevOrders.map(order => 
           order.id === orderId ? { ...order, status: newStatus } : order
@@ -51,7 +50,7 @@ const Orders = () => {
       );
     } catch (err) {
       console.error(err);
-      alert('Error al intentar actualizar el estado del pedido.');
+      alert('Error al intentar cambiar el estado del pedido.');
     } finally {
       setUpdatingId(null);
     }
@@ -61,7 +60,7 @@ const Orders = () => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 2
+      minimumFractionDigits: 0
     }).format(val);
   };
 
@@ -71,16 +70,14 @@ const Orders = () => {
     return date.toLocaleDateString('es-AR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     });
   };
 
   if (!user) {
     return (
       <div className="glass-card" style={{ padding: '40px 24px', textAlign: 'center', marginTop: '40px' }}>
-        <p style={{ color: 'var(--text-secondary)' }}>Por favor, inicia sesión para ver tus pedidos.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Por favor, inicia sesión para consultar tus pedidos.</p>
       </div>
     );
   }
@@ -88,11 +85,11 @@ const Orders = () => {
   return (
     <div className="fade-in" style={{ paddingBottom: '32px' }}>
       <h2 style={{ 
-        fontSize: '24px', 
-        fontWeight: 800, 
-        fontFamily: 'var(--font-title)', 
+        fontSize: '20px', 
+        fontWeight: 700, 
         marginBottom: '20px',
-        textAlign: 'left'
+        textAlign: 'left',
+        letterSpacing: '-0.01em'
       }}>
         {isSellerOrAdmin ? 'Pedidos de la Tienda' : 'Mis Pedidos'}
       </h2>
@@ -103,11 +100,11 @@ const Orders = () => {
         <div className="glass-card" style={{
           padding: '24px',
           textAlign: 'center',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
+          border: '1px solid var(--color-cancelled)',
           color: 'var(--text-secondary)'
         }}>
-          <p>{error}</p>
-          <button onClick={fetchOrders} className="btn btn-secondary" style={{ marginTop: '12px', padding: '8px 16px', minHeight: 'auto' }}>
+          <p style={{ fontSize: '13px' }}>{error}</p>
+          <button onClick={fetchOrders} className="btn btn-secondary" style={{ marginTop: '12px', padding: '8px 16px', minHeight: 'auto', fontSize: '11px' }}>
             Reintentar
           </button>
         </div>
@@ -115,11 +112,11 @@ const Orders = () => {
         <div className="glass-card" style={{
           padding: '40px 24px',
           textAlign: 'center',
-          color: 'var(--text-secondary)'
+          color: 'var(--text-secondary)',
+          background: '#ffffff'
         }}>
-          <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}>📦</span>
-          <p style={{ fontWeight: 500 }}>
-            {isSellerOrAdmin ? 'No hay pedidos registrados en la tienda todavía.' : 'Aún no has realizado ningún pedido.'}
+          <p style={{ fontWeight: 600, fontSize: '14px' }}>
+            {isSellerOrAdmin ? 'No existen pedidos registrados en el sistema.' : 'Aún no posees ningún pedido realizado.'}
           </p>
         </div>
       ) : (
@@ -127,8 +124,6 @@ const Orders = () => {
           {orders.map((order) => {
             const isExpanded = expandedOrder === order.id;
             const items = order.items || [];
-            
-            // Calculate total price based on order items
             const orderTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
             return (
@@ -136,13 +131,13 @@ const Orders = () => {
                 key={order.id} 
                 className="glass-card" 
                 style={{
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--outline-variant)',
                   overflow: 'hidden',
-                  transition: 'all 0.2s ease',
-                  padding: '16px'
+                  padding: '16px',
+                  background: '#ffffff'
                 }}
               >
-                {/* Order Summary Header */}
+                {/* Header */}
                 <div 
                   onClick={() => handleToggleExpand(order.id)}
                   style={{
@@ -154,66 +149,66 @@ const Orders = () => {
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700 }}>
                       Orden #{order.id}
                     </span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Calendar size={12} /> {formatDate(order.created_at)}
                     </span>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 700 }}>
                         {formatPrice(orderTotal)}
                       </span>
-                      {/* Badge status */}
                       <span className={`badge badge-${order.status || 'pending'}`}>
                         {order.status === 'pending' && 'Pendiente'}
-                        {order.status === 'processing' && 'En Proceso'}
+                        {order.status === 'processing' && 'Proceso'}
                         {order.status === 'shipped' && 'Enviado'}
                         {order.status === 'delivered' && 'Entregado'}
                         {order.status === 'cancelled' && 'Cancelado'}
                       </span>
                     </div>
-                    {isExpanded ? <ChevronUp size={18} className="text-secondary" /> : <ChevronDown size={18} className="text-secondary" />}
+                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </div>
                 </div>
 
-                {/* Expanded Details Section */}
+                {/* Expanded Details */}
                 {isExpanded && (
                   <div style={{
                     marginTop: '16px',
                     paddingTop: '16px',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                    borderTop: '1px solid var(--surface-container-highest)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '16px',
                     animation: 'slideDown 0.2s ease-out'
                   }}>
-                    {/* Customer Info Card Details */}
+                    {/* Customer Info */}
                     <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr',
+                      display: 'flex',
+                      flexDirection: 'column',
                       gap: '8px',
-                      background: 'rgba(255, 255, 255, 0.02)',
+                      background: 'var(--surface-container-low)',
+                      border: '1px solid var(--outline-variant)',
                       padding: '12px',
-                      borderRadius: '10px',
-                      fontSize: '13px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
                       textAlign: 'left'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
-                        <User size={14} /> <strong>Destinatario:</strong> {order.customer_name} ({order.customer_email})
+                        <User size={13} /> <strong>Destinatario:</strong> {order.customer_name} ({order.customer_email})
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
-                        <Phone size={14} /> <strong>Teléfono:</strong> {order.customer_phone}
+                        <Phone size={13} /> <strong>Teléfono:</strong> {order.customer_phone}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
-                        <MapPin size={14} /> <strong>Dirección:</strong> {order.shipping_address}
+                        <MapPin size={13} /> <strong>Dirección:</strong> {order.shipping_address}
                       </div>
                       {order.notes && (
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                          <Clock size={14} style={{ marginTop: '2px' }} /> 
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: 'var(--text-secondary)' }}>
+                          <Clock size={13} style={{ marginTop: '2px' }} /> 
                           <div>
                             <strong>Notas:</strong> <span style={{ fontStyle: 'italic' }}>{order.notes}</span>
                           </div>
@@ -221,10 +216,10 @@ const Orders = () => {
                       )}
                     </div>
 
-                    {/* Order Items */}
+                    {/* Order items details */}
                     <div>
-                      <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-secondary)', textAlign: 'left' }}>
-                        Productos en Pedido
+                      <h4 className="label-caps" style={{ fontSize: '9px', marginBottom: '8px', textAlign: 'left' }}>
+                        Relojes Adquiridos
                       </h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {items.map((item, idx) => (
@@ -235,12 +230,12 @@ const Orders = () => {
                               justifyContent: 'space-between', 
                               fontSize: '13px',
                               padding: '4px 0',
-                              borderBottom: '1px dashed rgba(255, 255, 255, 0.03)'
+                              borderBottom: '1px dashed var(--surface-container-highest)'
                             }}
                           >
                             <span style={{ color: 'var(--text-secondary)', textAlign: 'left' }}>
-                              {item.product ? item.product.name : `Producto ID #${item.product_id}`} 
-                              <strong style={{ color: 'var(--text-primary)' }}> x{item.quantity}</strong>
+                              {item.product ? item.product.name : `Reloj ID #${item.product_id}`} 
+                              <strong style={{ color: 'var(--primary)' }}> x{item.quantity}</strong>
                             </span>
                             <span style={{ fontWeight: 600 }}>
                               {formatPrice(item.price * item.quantity)}
@@ -250,21 +245,21 @@ const Orders = () => {
                       </div>
                     </div>
 
-                    {/* Admin/Seller Actions to Change State */}
+                    {/* Status modifications */}
                     {isSellerOrAdmin && (
                       <div style={{
-                        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                        borderTop: '1px solid var(--surface-container-highest)',
                         paddingTop: '12px',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '8px',
                         alignItems: 'flex-start'
                       }}>
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                          Gestionar Estado de la Orden
+                        <span className="label-caps" style={{ fontSize: '9px' }}>
+                          Actualizar estado de orden
                         </span>
                         
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', width: '100%' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', width: '100%' }}>
                           {['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((statusOption) => {
                             const isCurrent = order.status === statusOption;
                             return (
@@ -274,22 +269,22 @@ const Orders = () => {
                                 disabled={updatingId === order.id || isCurrent}
                                 className="btn"
                                 style={{
-                                  padding: '4px 10px',
-                                  fontSize: '11px',
+                                  padding: '4px 8px',
+                                  fontSize: '10px',
                                   minWidth: 'auto',
                                   minHeight: 'auto',
                                   borderRadius: '6px',
-                                  background: isCurrent ? 'var(--primary)' : 'rgba(255, 255, 255, 0.03)',
-                                  border: `1px solid ${isCurrent ? 'var(--primary)' : 'var(--border-color)'}`,
+                                  background: isCurrent ? 'var(--primary)' : 'var(--surface-container-high)',
+                                  border: `1px solid ${isCurrent ? 'var(--primary)' : 'var(--outline-variant)'}`,
                                   color: isCurrent ? '#fff' : 'var(--text-secondary)',
                                   opacity: updatingId === order.id ? 0.5 : 1
                                 }}
                               >
                                 {statusOption === 'pending' && 'Pendiente'}
-                                {statusOption === 'processing' && 'En Proceso'}
+                                {statusOption === 'processing' && 'Proceso'}
                                 {statusOption === 'shipped' && 'Enviado'}
                                 {statusOption === 'delivered' && 'Entregado'}
-                                {statusOption === 'cancelled' && 'Cancelar'}
+                                {statusOption === 'cancelled' && 'Anular'}
                               </button>
                             );
                           })}

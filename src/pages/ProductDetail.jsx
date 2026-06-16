@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShoppingCart, Plus, Minus, Check, Edit } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Plus, Minus, Check, Edit } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,28 +16,13 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 2
+      minimumFractionDigits: 0
     }).format(val);
   };
 
   const isOutOfStock = stock <= 0;
   const isLowStock = stock > 0 && stock <= 3;
   const isSellerOrAdmin = user && (user.role === 'vendedor' || user.role === 'admin');
-
-  // Dynamic aesthetic background gradient fallback
-  const hashString = (str) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return hash;
-  };
-  const getGradient = (productId, label) => {
-    const seed = hashString(label + productId);
-    const h1 = Math.abs(seed % 360);
-    const h2 = (h1 + 60) % 360;
-    return `linear-gradient(135deg, hsl(${h1}, 70%, 40%), hsl(${h2}, 80%, 20%))`;
-  };
 
   const handleQtyChange = (val) => {
     if (val >= 1 && val <= stock) {
@@ -62,47 +47,46 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: '6px',
           marginBottom: '20px',
-          padding: '8px 14px',
+          padding: '6px 12px',
           minHeight: 'auto',
-          borderRadius: '10px'
+          borderRadius: '8px',
+          fontSize: '11px'
         }}
       >
-        <ArrowLeft size={16} /> Volver al catálogo
+        <ArrowLeft size={14} /> Volver al catálogo
       </button>
 
       {/* Detail Card */}
       <div className="glass-card" style={{
         overflow: 'hidden',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--outline-variant)',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        background: '#ffffff'
       }}>
         {/* Visual Container */}
         <div style={{
           width: '100%',
-          height: '240px',
+          height: '280px',
           position: 'relative',
-          background: getGradient(id || 0, name),
+          background: 'var(--surface-container-low)',
+          borderBottom: '1px solid var(--outline-variant)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}>
           {brand && (
-            <span style={{
+            <span className="label-caps" style={{
               position: 'absolute',
               top: '16px',
               left: '16px',
-              background: 'rgba(9, 13, 22, 0.8)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-primary)',
-              fontSize: '11px',
-              fontWeight: 700,
-              padding: '6px 12px',
-              borderRadius: '8px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em'
+              background: '#ffffff',
+              border: '1px solid var(--outline-variant)',
+              fontSize: '10px',
+              padding: '4px 10px',
+              borderRadius: '6px'
             }}>
               {brand}
             </span>
@@ -122,7 +106,9 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
               }}
             />
           ) : (
-            <span style={{ fontSize: '72px', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}>⌚</span>
+            <span className="label-caps" style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+              HOROLOGY COLLECTION
+            </span>
           )}
         </div>
 
@@ -130,9 +116,9 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
         <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <h1 style={{
-              fontSize: '22px',
-              fontWeight: 800,
-              fontFamily: 'var(--font-title)',
+              fontSize: '20px',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
               marginBottom: '8px',
               lineHeight: 1.3,
               textAlign: 'left'
@@ -142,10 +128,9 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
 
             {/* Price tag */}
             <span style={{
-              fontSize: '26px',
-              fontWeight: 800,
-              color: 'var(--text-primary)',
-              fontFamily: 'var(--font-title)',
+              fontSize: '22px',
+              fontWeight: 700,
+              color: 'var(--primary)',
               display: 'block',
               textAlign: 'left',
               margin: '8px 0'
@@ -156,18 +141,18 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
             {/* Stock status indicator */}
             <div style={{ display: 'flex', alignItems: 'center', marginTop: '4px' }}>
               {isOutOfStock ? (
-                <span className="badge badge-cancelled">Sin Stock Disponible</span>
+                <span className="badge badge-cancelled">Sin Stock</span>
               ) : isLowStock ? (
-                <span className="badge badge-pending">¡Últimas unidades! Solo quedan {stock}</span>
+                <span className="badge badge-pending">Últimas {stock} unidades</span>
               ) : (
-                <span className="badge badge-delivered">Unidades Disponibles ({stock})</span>
+                <span className="badge badge-delivered">Disponible ({stock})</span>
               )}
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', textAlign: 'left' }}>
-              Descripción del Producto
+          <div style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '16px' }}>
+            <h3 className="label-caps" style={{ fontSize: '10px', marginBottom: '8px', textAlign: 'left' }}>
+              Especificaciones y Detalles
             </h3>
             <p style={{
               fontSize: '14px',
@@ -176,13 +161,13 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
               textAlign: 'left',
               whiteSpace: 'pre-wrap'
             }}>
-              {description || 'Este producto no cuenta con una descripción detallada en este momento.'}
+              {description || 'Este reloj de lujo no posee una descripción cargada actualmente.'}
             </p>
           </div>
 
           {/* Action Row */}
           <div style={{
-            borderTop: '1px solid var(--border-color)',
+            borderTop: '1px solid var(--outline-variant)',
             paddingTop: '20px',
             marginTop: '8px',
             display: 'flex',
@@ -196,7 +181,7 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
                 className="btn btn-primary"
                 style={{ width: '100%' }}
               >
-                <Edit size={16} /> Editar Producto
+                Editar Reloj
               </button>
             ) : (
               <>
@@ -205,18 +190,19 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    background: 'rgba(255,255,255,0.03)',
+                    background: 'var(--surface-container-low)',
                     padding: '8px 16px',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border-color)'
+                    borderRadius: '10px',
+                    border: '1px solid var(--outline-variant)'
                   }}>
-                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Cantidad</span>
+                    <span className="label-caps" style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>Cantidad</span>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      background: 'rgba(255,255,255,0.05)',
-                      borderRadius: '8px',
-                      padding: '2px'
+                      background: '#ffffff',
+                      borderRadius: '6px',
+                      padding: '2px',
+                      border: '1px solid var(--outline-variant)'
                     }}>
                       <button 
                         onClick={() => handleQtyChange(qty - 1)}
@@ -225,8 +211,8 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
                           background: 'none',
                           border: 'none',
                           color: 'var(--text-primary)',
-                          width: '32px',
-                          height: '32px',
+                          width: '28px',
+                          height: '28px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -234,12 +220,12 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
                           opacity: qty <= 1 ? 0.3 : 1
                         }}
                       >
-                        <Minus size={14} />
+                        <Minus size={12} />
                       </button>
                       <span style={{
-                        fontSize: '15px',
+                        fontSize: '13px',
                         fontWeight: 700,
-                        width: '36px',
+                        width: '32px',
                         textAlign: 'center'
                       }}>
                         {qty}
@@ -251,8 +237,8 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
                           background: 'none',
                           border: 'none',
                           color: 'var(--text-primary)',
-                          width: '32px',
-                          height: '32px',
+                          width: '28px',
+                          height: '28px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -260,7 +246,7 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
                           opacity: qty >= stock ? 0.3 : 1
                         }}
                       >
-                        <Plus size={14} />
+                        <Plus size={12} />
                       </button>
                     </div>
                   </div>
@@ -272,16 +258,16 @@ const ProductDetail = ({ product, onBack, onEdit }) => {
                   className={`btn ${added ? 'btn-success' : 'btn-primary'}`}
                   style={{
                     width: '100%',
-                    fontSize: '15px',
+                    fontSize: '11px',
                   }}
                 >
                   {added ? (
                     <>
-                      <Check size={18} /> ¡Agregado al carrito!
+                      <Check size={16} /> Agregado
                     </>
                   ) : (
                     <>
-                      <ShoppingCart size={18} /> {isOutOfStock ? 'Agotado' : 'Añadir al Carrito'}
+                      <ShoppingBag size={16} /> {isOutOfStock ? 'Agotado' : 'Añadir al Carrito'}
                     </>
                   )}
                 </button>

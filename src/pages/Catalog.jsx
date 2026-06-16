@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, SlidersHorizontal, Plus, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../services/api';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -19,6 +19,9 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
   const [inStock, setInStock] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   
+  // Category Chips state
+  const [activeCategory, setActiveCategory] = useState('ALL');
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
@@ -31,9 +34,15 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
     setLoading(true);
     setError('');
     try {
+      // Calculate search query merging search input and selected category chip
+      let searchQuery = search;
+      if (activeCategory !== 'ALL') {
+        searchQuery = searchQuery ? `${searchQuery} ${activeCategory}` : activeCategory;
+      }
+
       const params = {
         page,
-        ...(search && { search }),
+        ...(searchQuery && { search: searchQuery }),
         ...(brand && { brand }),
         ...(maxPrice && { max_price: maxPrice }),
         ...(inStock && { in_stock: 'true' })
@@ -41,8 +50,6 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
       
       const response = await api.get('/products', { params });
       
-      // Standard Laravel pagination response: response.data = { data: [...], current_page: 1, last_page: 5, total: 20 }
-      // In some projects, it might return direct array if there's no pagination, so let's support both
       if (response.data && response.data.data) {
         setProducts(response.data.data);
         setCurrentPage(response.data.current_page || 1);
@@ -58,20 +65,19 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
       }
     } catch (err) {
       console.error(err);
-      setError('No se pudieron cargar los productos. Asegúrate de que el servidor esté activo.');
+      setError('No se pudieron cargar los productos. Por favor, asegúrate de que el servidor esté encendido.');
     } finally {
       setLoading(false);
     }
-  }, [search, brand, maxPrice, inStock]);
+  }, [search, brand, maxPrice, inStock, activeCategory]);
 
-  // Debounced/Triggered search & filter application
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchProducts(1);
     }, 400);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [search, brand, maxPrice, inStock, fetchProducts]);
+  }, [search, brand, maxPrice, inStock, activeCategory, fetchProducts]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= lastPage) {
@@ -84,19 +90,20 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
     setBrand('');
     setMaxPrice('');
     setInStock(false);
+    setActiveCategory('ALL');
   };
 
   return (
     <div className="fade-in" style={{ paddingBottom: '32px' }}>
-      {/* Header and Floating CRUD action */}
+      {/* Header and New Product Action */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: '20px'
       }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 800, fontFamily: 'var(--font-title)' }}>
-          Catálogo
+        <h2 style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.02em' }}>
+          Timepieces
         </h2>
 
         {isSellerOrAdmin && (
@@ -104,47 +111,48 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
             onClick={onCreateProduct}
             className="btn btn-primary"
             style={{
-              padding: '8px 16px',
-              fontSize: '13px',
-              borderRadius: '12px',
+              padding: '6px 12px',
+              fontSize: '11px',
+              borderRadius: '8px',
               minHeight: 'auto'
             }}
             disabled={user.role === 'vendedor' && !isApproved}
-            title={user.role === 'vendedor' && !isApproved ? 'Tu cuenta de vendedor requiere aprobación' : 'Agregar nuevo producto'}
+            title={user.role === 'vendedor' && !isApproved ? 'Cuenta pendiente de aprobación' : 'Agregar nuevo reloj'}
           >
-            <Plus size={16} /> Nuevo Producto
+            <Plus size={14} /> Nuevo
           </button>
         )}
       </div>
 
-      {/* Seller pending banner */}
+      {/* Seller pending notification */}
       {user && user.role === 'vendedor' && !isApproved && (
         <div style={{
           background: 'var(--color-pending-bg)',
-          border: '1px solid rgba(245, 158, 11, 0.3)',
-          borderRadius: '12px',
+          border: '1px solid var(--color-pending)',
+          borderRadius: '10px',
           padding: '12px 16px',
-          color: '#fcd34d',
-          fontSize: '13px',
+          color: 'var(--color-pending)',
+          fontSize: '12px',
           marginBottom: '20px',
           textAlign: 'left',
-          lineHeight: 1.4
+          lineHeight: 1.4,
+          fontWeight: 500
         }}>
-          ⚠️ <strong>Cuenta Pendiente:</strong> Tu cuenta de vendedor está en espera de aprobación por un Administrador. No podrás crear ni modificar productos hasta ser aprobado.
+          Aviso: Tu cuenta de vendedor está en espera de aprobación por un administrador. No podrás crear ni modificar productos hasta entonces.
         </div>
       )}
 
-      {/* Search Bar & Filter Toggle */}
+      {/* Search Bar & Filter Button */}
       <div style={{
         display: 'flex',
-        gap: '10px',
+        gap: '8px',
         marginBottom: '16px'
       }}>
         <div style={{
           flex: 1,
           position: 'relative'
         }}>
-          <Search size={18} style={{
+          <Search size={16} style={{
             position: 'absolute',
             left: '12px',
             top: '50%',
@@ -154,37 +162,91 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
           <input
             type="text"
             className="form-input"
-            placeholder="Buscar por marca, nombre..."
+            placeholder="Buscar colecciones..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ paddingLeft: '40px' }}
+            style={{ 
+              paddingLeft: '38px',
+              background: 'var(--surface-container-low)',
+              borderRadius: '10px',
+              border: 'none',
+              fontSize: '13px'
+            }}
           />
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`btn ${showFilters ? 'btn-primary' : 'btn-secondary'}`}
+          className="btn btn-secondary"
           style={{
-            width: '48px',
             height: '48px',
-            padding: 0,
+            padding: '0 16px',
             minWidth: 'auto',
-            borderRadius: '12px',
-            backgroundColor: showFilters ? 'var(--primary)' : 'rgba(255,255,255,0.04)'
+            borderRadius: '10px',
+            fontSize: '11px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: showFilters ? 'var(--surface-container-high)' : 'var(--bg-primary)',
+            borderColor: 'var(--outline-variant)'
           }}
-          title="Filtros avanzados"
+          title="Filtros"
         >
-          <SlidersHorizontal size={18} />
+          <SlidersHorizontal size={14} />
+          <span className="label-caps" style={{ fontSize: '9px', color: 'var(--primary)' }}>FILTROS</span>
         </button>
       </div>
 
-      {/* Sliding/Accordion Filters Block */}
+      {/* Category Chips Scrollbar (matching estilos.html) */}
+      <div className="hide-scrollbar" style={{
+        display: 'flex',
+        gap: '8px',
+        overflowX: 'auto',
+        paddingBottom: '16px',
+        marginBottom: '16px',
+        WebkitOverflowScrolling: 'touch'
+      }}>
+        {[
+          { id: 'ALL', label: 'Todos los Relojes' },
+          { id: 'AUTOMATIC', label: 'Automatic' },
+          { id: 'CHRONOGRAPH', label: 'Chronograph' },
+          { id: 'VINTAGE', label: 'Vintage' },
+          { id: 'DIVE', label: 'Dive' }
+        ].map((cat) => {
+          const isActive = activeCategory === cat.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className="label-caps"
+              style={{
+                padding: '6px 14px',
+                borderRadius: '9999px',
+                border: `1px solid ${isActive ? 'var(--primary)' : 'var(--outline-variant)'}`,
+                background: isActive ? 'var(--primary)' : 'var(--surface-container-high)',
+                color: isActive ? '#ffffff' : 'var(--text-secondary)',
+                fontSize: '9px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {cat.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Filters Form Drawer */}
       {showFilters && (
         <div 
           className="glass-card" 
           style={{
-            padding: '18px',
+            padding: '16px',
             marginBottom: '20px',
-            border: '1px solid var(--border-color)',
+            border: '1px solid var(--outline-variant)',
+            background: '#ffffff',
+            borderRadius: '10px',
             animation: 'slideDown 0.2s ease-out'
           }}
         >
@@ -192,27 +254,27 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '14px'
+            marginBottom: '12px'
           }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 600 }}>Filtros Avanzados</h3>
+            <span className="label-caps" style={{ fontSize: '10px', color: 'var(--primary)' }}>Filtros avanzados</span>
             <button 
               onClick={handleClearFilters}
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--primary)',
-                fontSize: '12px',
+                color: 'var(--secondary)',
+                fontSize: '11px',
                 fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
-              Limpiar filtros
+              Limpiar
             </button>
           </div>
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
             gap: '12px'
           }}>
             <div className="form-group" style={{ margin: 0 }}>
@@ -224,7 +286,7 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
                 placeholder="Ej. Casio"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
-                style={{ height: '40px', minHeight: 'auto' }}
+                style={{ height: '36px', minHeight: 'auto', borderRadius: '8px', fontSize: '12px' }}
               />
             </div>
 
@@ -237,15 +299,15 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
                 placeholder="Monto"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                style={{ height: '40px', minHeight: 'auto' }}
+                style={{ height: '36px', minHeight: 'auto', borderRadius: '8px', fontSize: '12px' }}
               />
             </div>
 
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              paddingTop: '26px'
+              gap: '6px',
+              paddingTop: '20px'
             }}>
               <input
                 id="filter-stock"
@@ -253,40 +315,43 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
                 checked={inStock}
                 onChange={(e) => setInStock(e.target.checked)}
                 style={{
-                  width: '18px',
-                  height: '18px',
+                  width: '16px',
+                  height: '16px',
                   cursor: 'pointer',
                   accentColor: 'var(--primary)'
                 }}
               />
               <label htmlFor="filter-stock" style={{
-                fontSize: '13px',
-                fontWeight: 500,
+                fontSize: '11px',
+                fontWeight: 600,
                 cursor: 'pointer',
-                color: 'var(--text-secondary)'
+                color: 'var(--text-secondary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
               }}>
-                Solo en stock
+                En Stock
               </label>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Catalog View area */}
+      {/* Catalog items representation */}
       {loading ? (
         <LoadingSpinner />
       ) : error ? (
         <div className="glass-card" style={{
           padding: '24px',
           textAlign: 'center',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-          color: 'var(--text-secondary)'
+          border: '1px solid var(--color-cancelled)',
+          color: 'var(--text-secondary)',
+          borderRadius: '10px'
         }}>
-          <p>{error}</p>
+          <p style={{ fontSize: '13px' }}>{error}</p>
           <button 
             onClick={() => fetchProducts(currentPage)} 
             className="btn btn-secondary" 
-            style={{ marginTop: '12px', padding: '8px 16px', minHeight: 'auto' }}
+            style={{ marginTop: '12px', padding: '8px 16px', minHeight: 'auto', fontSize: '11px' }}
           >
             Reintentar
           </button>
@@ -295,19 +360,20 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
         <div className="glass-card" style={{
           padding: '40px 24px',
           textAlign: 'center',
-          color: 'var(--text-secondary)'
+          color: 'var(--text-secondary)',
+          borderRadius: '10px'
         }}>
-          <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}>🔍</span>
-          <p style={{ fontWeight: 500 }}>No se encontraron productos coincidentes.</p>
-          <p style={{ fontSize: '13px', marginTop: '4px' }}>Prueba ajustando los filtros de búsqueda.</p>
+          <p style={{ fontWeight: 600, fontSize: '14px' }}>No se encontraron relojes.</p>
+          <p style={{ fontSize: '12px', marginTop: '4px' }}>Prueba ajustando los filtros de búsqueda.</p>
         </div>
       ) : (
         <>
-          {/* Products Grid */}
+          {/* Catalog Grid */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', // Exact grid-cols-2 from estilos.html
             gap: '16px',
+            rowGap: '28px',
             marginBottom: '24px'
           }}>
             {products.map((product) => (
@@ -320,7 +386,7 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
             ))}
           </div>
 
-          {/* Premium Pagination controls */}
+          {/* Pagination */}
           {lastPage > 1 && (
             <div style={{
               display: 'flex',
@@ -334,23 +400,19 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
                 disabled={currentPage === 1}
                 className="btn btn-secondary"
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '32px',
+                  height: '32px',
                   padding: 0,
                   minWidth: 'auto',
                   minHeight: 'auto',
-                  borderRadius: '10px'
+                  borderRadius: '8px'
                 }}
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={16} />
               </button>
               
-              <span style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: 'var(--text-secondary)'
-              }}>
-                Pág. {currentPage} de {lastPage}
+              <span className="label-caps" style={{ fontSize: '10px' }}>
+                {currentPage} / {lastPage}
               </span>
 
               <button
@@ -358,15 +420,15 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
                 disabled={currentPage === lastPage}
                 className="btn btn-secondary"
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '32px',
+                  height: '32px',
                   padding: 0,
                   minWidth: 'auto',
                   minHeight: 'auto',
-                  borderRadius: '10px'
+                  borderRadius: '8px'
                 }}
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </button>
             </div>
           )}
@@ -375,7 +437,7 @@ const Catalog = ({ onSelectProduct, onEditProduct, onCreateProduct }) => {
 
       <style>{`
         @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-10px); }
+          from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>

@@ -13,32 +13,31 @@ const BottomNav = ({ activeTab, onNavigate }) => {
     },
     {
       id: 'orders',
-      label: user && (user.role === 'vendedor' || user.role === 'admin') ? 'Pedidos Tienda' : 'Mis Pedidos',
+      label: user && (user.role === 'vendedor' || user.role === 'admin') ? 'Pedidos' : 'Pedidos',
       icon: ClipboardList,
     },
     {
       id: 'profile',
-      label: 'Mi Perfil',
+      label: 'Perfil',
       icon: User,
     }
   ];
 
   return (
-    <nav className="glass-card" style={{
+    <nav style={{
       position: 'fixed',
-      bottom: '16px',
-      left: '16px',
-      right: '16px',
+      bottom: 0,
+      left: 0,
+      width: '100%',
       height: 'var(--bottom-nav-height)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-around',
-      padding: '0 8px',
+      padding: '0 16px',
       zIndex: 99,
-      borderRadius: '20px',
-      border: '1px solid var(--border-color)',
-      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
-      background: 'rgba(9, 13, 22, 0.85)',
+      borderTop: '1px solid var(--outline-variant)',
+      background: 'var(--bg-primary)',
+      boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.02)'
     }}>
       {tabs.map((tab) => {
         const Icon = tab.icon;
@@ -60,37 +59,22 @@ const BottomNav = ({ activeTab, onNavigate }) => {
               cursor: 'pointer',
               flex: 1,
               height: '100%',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              position: 'relative'
+              transition: 'all 0.15s ease',
+              opacity: isActive ? 1 : 0.65
             }}
           >
-            {/* Active glow background dot */}
-            {isActive && (
-              <span style={{
-                position: 'absolute',
-                top: '6px',
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--primary)',
-                boxShadow: '0 0 10px var(--primary)'
-              }} />
-            )}
-
             <Icon 
-              size={20} 
+              size={18} 
               style={{
-                transform: isActive ? 'scale(1.15) translateY(-2px)' : 'scale(1)',
-                transition: 'transform 0.2s ease',
                 strokeWidth: isActive ? 2.5 : 2
               }} 
             />
 
-            <span style={{
-              fontSize: '11px',
-              fontWeight: isActive ? '600' : '400',
-              fontFamily: 'var(--font-title)',
-              transition: 'color 0.2s ease'
+            <span className="label-caps" style={{
+              fontSize: '10px',
+              fontWeight: isActive ? '700' : '500',
+              color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+              marginTop: '2px'
             }}>
               {tab.label}
             </span>

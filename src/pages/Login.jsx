@@ -20,7 +20,6 @@ const Login = ({ onNavigate }) => {
     setLoading(true);
     try {
       await login(email, password);
-      // On success, redirect to catalog or previous tab
       onNavigate('catalog');
     } catch (err) {
       console.error(err);
@@ -29,7 +28,7 @@ const Login = ({ onNavigate }) => {
       } else if (err.response && err.response.status === 401) {
         setError('Credenciales inválidas. Por favor, intenta de nuevo.');
       } else {
-        setError('Ocurrió un error al intentar iniciar sesión. Verifica tu conexión.');
+        setError('Error al intentar iniciar sesión. Verifica tu conexión.');
       }
     } finally {
       setLoading(false);
@@ -42,36 +41,38 @@ const Login = ({ onNavigate }) => {
         padding: '32px 24px',
         maxWidth: '400px',
         margin: '40px auto 0 auto',
-        textAlign: 'center'
+        textAlign: 'center',
+        background: '#ffffff',
+        border: '1px solid var(--outline-variant)'
       }}>
-        <span style={{ fontSize: '48px', marginBottom: '16px', display: 'block' }}>🔐</span>
         <h2 style={{
-          fontSize: '24px',
-          fontFamily: 'var(--font-title)',
-          marginBottom: '8px'
+          fontSize: '20px',
+          fontWeight: 700,
+          marginBottom: '8px',
+          letterSpacing: '-0.01em'
         }}>
           Iniciar Sesión
         </h2>
         <p style={{
-          fontSize: '14px',
+          fontSize: '13px',
           color: 'var(--text-secondary)',
           marginBottom: '24px'
         }}>
-          Ingresa a tu cuenta de Tic-Tac Store
+          Ingresa a tu cuenta de Horology
         </p>
 
         {error && (
           <div style={{
             background: 'var(--color-cancelled-bg)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '12px',
+            border: '1px solid var(--color-cancelled)',
+            borderRadius: '10px',
             padding: '12px 16px',
-            color: '#fca5a5',
+            color: 'var(--color-cancelled)',
             fontSize: '13px',
             marginBottom: '20px',
             textAlign: 'left'
           }}>
-            ⚠️ {error}
+            {error}
           </div>
         )}
 
@@ -107,23 +108,23 @@ const Login = ({ onNavigate }) => {
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', marginBottom: '20px' }}
+            style={{ width: '100%', marginBottom: '20px', fontSize: '11px' }}
             disabled={loading}
           >
-            {loading ? 'Iniciando sesión...' : 'Ingresar'}
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
 
         <p style={{
-          fontSize: '13px',
+          fontSize: '12px',
           color: 'var(--text-secondary)'
         }}>
           ¿No tienes una cuenta?{' '}
           <span
             onClick={() => onNavigate('register')}
             style={{
-              color: 'var(--primary)',
-              fontWeight: 600,
+              color: 'var(--secondary)',
+              fontWeight: 700,
               cursor: 'pointer',
               textDecoration: 'underline'
             }}
