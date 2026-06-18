@@ -1,10 +1,8 @@
 import React from 'react';
-import { ShoppingBag, User } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-const Navbar = ({ onCartToggle, onNavigate }) => {
-  const { user } = useAuth();
+const Navbar = ({ onCartToggle }) => {
   const { cartCount } = useCart();
 
   return (
@@ -23,7 +21,6 @@ const Navbar = ({ onCartToggle, onNavigate }) => {
     }}>
       {/* Brand Logo */}
       <div 
-        onClick={() => onNavigate('catalog')} 
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -85,53 +82,6 @@ const Navbar = ({ onCartToggle, onNavigate }) => {
             </span>
           )}
         </button>
-
-        {/* User Profile */}
-        {user ? (
-          <div 
-            onClick={() => onNavigate('profile')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'var(--surface-container-low)',
-              padding: '8px 12px',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              border: '1px solid var(--outline-variant)',
-              transition: 'background-color 0.2s ease',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--surface-container-high)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--surface-container-low)'}
-          >
-            <User size={16} />
-            <span style={{
-              fontSize: '12px',
-              fontWeight: 600,
-              maxWidth: '80px',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em'
-            }}>
-              {user.name.split(' ')[0]}
-            </span>
-          </div>
-        ) : (
-          <button 
-            onClick={() => onNavigate('login')}
-            className="btn btn-primary"
-            style={{
-              padding: '8px 16px',
-              minHeight: 'auto',
-              fontSize: '11px',
-              borderRadius: '10px',
-            }}
-          >
-            Ingresar
-          </button>
-        )}
       </div>
     </header>
   );

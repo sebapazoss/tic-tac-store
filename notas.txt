@@ -6,4 +6,4 @@ solo de ese pedido y no de todos??
 
 agregar opcion de ordenar el catalogo por precios acendente o decendente
 
-para mas adelante la parte del pago MUY IMPORTANTE 
+para mas adelante la parte del pago con las funciones de mercado pago como desarrollador MUY IMPORTANTE 

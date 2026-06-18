@@ -1,36 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ordersAPI } from './services/api';
 
 // Components
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import CartDrawer from './components/CartDrawer';
-import LoadingSpinner from './components/LoadingSpinner';
 
 // Pages
 import Catalog from './pages/Catalog';
 import ProductDetail from './pages/ProductDetail';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import Profile from './pages/Profile';
+import OrderAccess from './pages/OrderAccess';
+import OrderDetail from './pages/OrderDetail';
 
 function AppContent() {
-  const { user, loading: authLoading } = useAuth();
-  const [currentView, setCurrentView] = useState('catalog'); // catalog, product-detail, login, register, checkout, orders, profile
+  const [currentView, setCurrentView] = useState('catalog');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [currentOrder, setCurrentOrder] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
 
-  if (authLoading) {
-    return <LoadingSpinner fullPage />;
-  }
+  // Verificar parámetros de URL al cargar
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const email = params.get('email');
+
+    if (token && email) {
+      // Cargar el pedido automáticamente
+      ordersAPI.getGuest(token, email)
+        .then((response) => {
+          setCurrentOrder(response.data);
+          setCurrentView('order-detail');
+          // Limpiar los parámetros de la URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        })
+        .catch((err) => {
+          console.error('Error cargando pedido desde URL:', err);
+          // Navegar a order-access para que el usuario ingrese los datos manualmente
+          setCurrentView('order-access');
+        });
+    }
+  }, []);
 
   const handleNavigate = (view) => {
     setCurrentView(view);
-    // Smooth scroll to top for mobile layout transitions
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -39,15 +54,22 @@ function AppContent() {
     handleNavigate('product-detail');
   };
 
+  const handleOrderCreated = (orderData) => {
+    setCurrentOrder(orderData);
+    setCurrentView('order-detail');
+  };
+
+  const handleOrderFound = (orderData) => {
+    setCurrentOrder(orderData);
+    setCurrentView('order-detail');
+  };
+
   return (
     <div className="app-container">
-      {/* Header Sticky Navigation */}
       <Navbar 
         onCartToggle={() => setCartOpen(!cartOpen)} 
-        onNavigate={handleNavigate} 
       />
 
-      {/* Main View Area */}
       <main className="main-content">
         {currentView === 'catalog' && (
           <Catalog 
@@ -62,42 +84,33 @@ function AppContent() {
           />
         )}
 
-        {currentView === 'login' && (
-          <Login onNavigate={handleNavigate} />
-        )}
-
-        {currentView === 'register' && (
-          <Register onNavigate={handleNavigate} />
-        )}
-
         {currentView === 'checkout' && (
-          <Checkout key={user?.id || 'guest'} onNavigate={handleNavigate} />
+          <Checkout onOrderCreated={handleOrderCreated} />
         )}
 
-        {currentView === 'orders' && (
-          <Orders />
+        {currentView === 'order-access' && (
+          <OrderAccess onOrderFound={handleOrderFound} />
         )}
 
-        {currentView === 'profile' && (
-          <Profile onNavigate={handleNavigate} />
+        {currentView === 'order-detail' && currentOrder && (
+          <OrderDetail 
+            order={currentOrder}
+            onBack={() => handleNavigate('order-access')}
+          />
         )}
       </main>
 
-      {/* Slide-out Shopping Cart Drawer */}
       <CartDrawer 
         isOpen={cartOpen} 
         onClose={() => setCartOpen(false)} 
         onCheckout={() => handleNavigate('checkout')}
       />
 
-      {/* Floating Bottom Nav for Mobile-First layout */}
       <BottomNav 
         activeTab={
           currentView === 'product-detail' || currentView === 'checkout'
             ? 'catalog' 
-            : (currentView === 'login' || currentView === 'register')
-              ? 'profile'
-              : currentView
+            : currentView
         } 
         onNavigate={handleNavigate} 
       />
@@ -107,11 +120,9 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <AppContent />
-      </CartProvider>
-    </AuthProvider>
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
   );
 }
 

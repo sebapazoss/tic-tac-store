@@ -1,10 +1,7 @@
 import React from 'react';
-import { Store, ClipboardList, User } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Store, ClipboardList } from 'lucide-react';
 
 const BottomNav = ({ activeTab, onNavigate }) => {
-  const { user } = useAuth();
-
   const tabs = [
     {
       id: 'catalog',
@@ -12,14 +9,9 @@ const BottomNav = ({ activeTab, onNavigate }) => {
       icon: Store,
     },
     {
-      id: 'orders',
-      label: user && (user.role === 'vendedor' || user.role === 'admin') ? 'Pedidos' : 'Pedidos',
+      id: 'order-access',
+      label: 'Pedidos',
       icon: ClipboardList,
-    },
-    {
-      id: 'profile',
-      label: 'Perfil',
-      icon: User,
     }
   ];
 

@@ -3,9 +3,9 @@ import axios from 'axios';
 // Detect connection type (local vs production)
 const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
-// In production on Vercel, the double prefix /api/api is required due to routing issues
+// API Base URL
 export const API_BASE_URL = isProduction
-  ? 'https://e-commerse-pazos-vedoya.vercel.app/api/api'
+  ? 'https://tu-backend-dominio.com/api'  // Cambiar en producción
   : 'http://localhost:8000/api';
 
 const api = axios.create({
@@ -16,18 +16,17 @@ const api = axios.create({
   },
 });
 
-// Interceptor to add Bearer token to requests
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// NO interceptor for Bearer token (guest-only app)
+
+export const productsAPI = {
+  getAll: (filters = {}) => api.get('/products', { params: filters }),
+  getById: (id) => api.get(`/products/${id}`),
+};
+
+export const ordersAPI = {
+  create: (data) => api.post('/orders', data),
+  getGuest: (token, email) => api.get(`/orders/guest/${token}`, { params: { email } }),
+  cancelGuest: (token, data) => api.patch(`/orders/guest/${token}/cancel`, data),
+};
 
 export default api;
