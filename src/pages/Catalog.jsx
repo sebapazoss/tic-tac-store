@@ -320,20 +320,27 @@ const Catalog = ({ onSelectProduct }) => {
           <p style={{ fontSize: '12px', marginTop: '4px' }}>Prueba ajustando los filtros de búsqueda.</p>
         </div>
       ) : (
-        <>
+      <>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-            gap: '16px',
-            rowGap: '28px',
+            columnCount: 2,
+            columnGap: '16px',
             marginBottom: '24px'
           }}>
             {products.map((product) => (
-              <ProductCard
+              <div 
                 key={product.id}
-                product={product}
-                onSelect={onSelectProduct}
-              />
+                style={{ 
+                  breakInside: 'avoid', /* Evita que la tarjeta se corte a la mitad entre columnas */
+                  marginBottom: '16px',
+                  display: 'inline-block',
+                  width: '100%'
+                }}
+              >
+                <ProductCard
+                  product={product}
+                  onSelect={onSelectProduct}
+                />
+              </div>
             ))}
           </div>
 
