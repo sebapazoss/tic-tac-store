@@ -10,4 +10,4 @@ metodo de pago con mercado pago
 
 cuando un cliente completa sus datos y vuelven a agregar otro producto que sus datos de envio permanezcan 
 
-10 
+verificar velocidad de carga de la pagina 
