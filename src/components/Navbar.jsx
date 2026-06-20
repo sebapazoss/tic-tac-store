@@ -2,7 +2,7 @@ import React from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-const Navbar = ({ onCartToggle }) => {
+const Navbar = ({ onCartToggle, onLogoClick }) => {
   const { cartCount } = useCart();
 
   return (
@@ -21,6 +21,7 @@ const Navbar = ({ onCartToggle }) => {
     }}>
       {/* Brand Logo */}
       <div 
+        onClick={onLogoClick}
         style={{
           display: 'flex',
           alignItems: 'center',

@@ -15,10 +15,8 @@ const Catalog = ({ onSelectProduct }) => {
   const [maxPrice, setMaxPrice] = useState('');
   const [inStock, setInStock] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState(''); // Nueva línea para ordenamiento
   
-  // Category Chips state
-  const [activeCategory, setActiveCategory] = useState('ALL');
-
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
@@ -27,17 +25,13 @@ const Catalog = ({ onSelectProduct }) => {
     setLoading(true);
     setError('');
     try {
-      let searchQuery = search;
-      if (activeCategory !== 'ALL') {
-        searchQuery = searchQuery ? `${searchQuery} ${activeCategory}` : activeCategory;
-      }
-
       const params = {
         page,
-        ...(searchQuery && { search: searchQuery }),
+        ...(search && { search }),
         ...(brand && { brand }),
         ...(maxPrice && { max_price: maxPrice }),
-        ...(inStock && { in_stock: 'true' })
+        ...(inStock && { in_stock: 'true' }),
+        ...(sortBy && { sort: sortBy })
       };
       
       const response = await api.get('/products', { params });
@@ -59,7 +53,7 @@ const Catalog = ({ onSelectProduct }) => {
     } finally {
       setLoading(false);
     }
-  }, [search, brand, maxPrice, inStock, activeCategory]);
+  }, [search, brand, maxPrice, inStock, sortBy]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -67,7 +61,7 @@ const Catalog = ({ onSelectProduct }) => {
     }, 400);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [search, brand, maxPrice, inStock, activeCategory, fetchProducts]);
+  }, [search, brand, maxPrice, inStock, sortBy, fetchProducts]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= lastPage) {
@@ -80,7 +74,18 @@ const Catalog = ({ onSelectProduct }) => {
     setBrand('');
     setMaxPrice('');
     setInStock(false);
-    setActiveCategory('ALL');
+    setSortBy('');
+  };
+
+  // Función para ordenar productos localmente
+  const getSortedProducts = () => {
+    const sorted = [...products];
+    if (sortBy === 'price_asc') {
+      return sorted.sort((a, b) => a.price - b.price);
+    } else if (sortBy === 'price_desc') {
+      return sorted.sort((a, b) => b.price - a.price);
+    }
+    return sorted;
   };
 
   return (
@@ -149,47 +154,6 @@ const Catalog = ({ onSelectProduct }) => {
         </button>
       </div>
 
-      {/* Categories chips */}
-      <div className="hide-scrollbar" style={{
-        display: 'flex',
-        gap: '8px',
-        overflowX: 'auto',
-        paddingBottom: '16px',
-        marginBottom: '16px',
-        WebkitOverflowScrolling: 'touch'
-      }}>
-        {[
-          { id: 'ALL', label: 'Todos los Relojes' },
-          { id: 'AUTOMATIC', label: 'Automatic' },
-          { id: 'CHRONOGRAPH', label: 'Chronograph' },
-          { id: 'VINTAGE', label: 'Vintage' },
-          { id: 'DIVE', label: 'Dive' }
-        ].map((cat) => {
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className="label-caps"
-              style={{
-                padding: '6px 14px',
-                borderRadius: '9999px',
-                border: `1px solid ${isActive ? 'var(--primary)' : 'var(--outline-variant)'}`,
-                background: isActive ? 'var(--primary)' : 'var(--surface-container-high)',
-                color: isActive ? '#ffffff' : 'var(--text-secondary)',
-                fontSize: '9px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {cat.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* Advanced Filters Block */}
       {showFilters && (
         <div 
@@ -203,32 +167,13 @@ const Catalog = ({ onSelectProduct }) => {
             animation: 'slideDown 0.2s ease-out'
           }}
         >
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '12px'
-          }}>
-            <span className="label-caps" style={{ fontSize: '10px', color: 'var(--primary)' }}>Filtros avanzados</span>
-            <button 
-              onClick={handleClearFilters}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--secondary)',
-                fontSize: '11px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Limpiar
-            </button>
-          </div>
+          <span className="label-caps" style={{ fontSize: '10px', color: 'var(--primary)', display: 'block', marginBottom: '12px' }}>Filtros avanzados</span>
 
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-            gap: '12px'
+            gap: '12px',
+            marginBottom: '16px'
           }}>
             <div className="form-group" style={{ margin: 0 }}>
               <label htmlFor="filter-brand">Marca</label>
@@ -254,6 +199,31 @@ const Catalog = ({ onSelectProduct }) => {
                 onChange={(e) => setMaxPrice(e.target.value)}
                 style={{ height: '36px', minHeight: 'auto', borderRadius: '8px', fontSize: '12px' }}
               />
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label htmlFor="filter-sort">Ordenar por</label>
+              <select
+                id="filter-sort"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                style={{ 
+                  height: '36px', 
+                  minHeight: 'auto', 
+                  borderRadius: '8px', 
+                  fontSize: '12px',
+                  border: '1px solid var(--outline-variant)',
+                  background: 'var(--surface-container-low)',
+                  color: 'var(--text-primary)',
+                  padding: '0 8px',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-family)'
+                }}
+              >
+                <option value="">Relevancia</option>
+                <option value="price_asc">Precio menor a mayor</option>
+                <option value="price_desc">Precio mayor a menor</option>
+              </select>
             </div>
 
             <div style={{
@@ -286,6 +256,30 @@ const Catalog = ({ onSelectProduct }) => {
               </label>
             </div>
           </div>
+
+          {/* Clear Filters Button */}
+          <button 
+            onClick={handleClearFilters}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              background: 'var(--primary)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontFamily: 'var(--font-family)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary)'}
+          >
+            Limpiar Filtros
+          </button>
         </div>
       )}
 
@@ -320,28 +314,38 @@ const Catalog = ({ onSelectProduct }) => {
           <p style={{ fontSize: '12px', marginTop: '4px' }}>Prueba ajustando los filtros de búsqueda.</p>
         </div>
       ) : (
-      <>
+        <>
           <div style={{
-            columnCount: 2,
-            columnGap: '16px',
-            marginBottom: '24px'
+            display: 'flex',
+            gap: '16px',
+            marginBottom: '24px',
+            alignItems: 'flex-start' /* Importante para que las tarjetas mantengan su altura original */
           }}>
-            {products.map((product) => (
-              <div 
-                key={product.id}
-                style={{ 
-                  breakInside: 'avoid', /* Evita que la tarjeta se corte a la mitad entre columnas */
-                  marginBottom: '16px',
-                  display: 'inline-block',
-                  width: '100%'
-                }}
-              >
-                <ProductCard
-                  product={product}
-                  onSelect={onSelectProduct}
-                />
-              </div>
-            ))}
+            {/* Columna Izquierda: Toma el 1ero, 3ero, 5to, etc. (índices pares: 0, 2, 4) */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {getSortedProducts()
+                .filter((_, index) => index % 2 === 0)
+                .map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onSelect={onSelectProduct}
+                  />
+              ))}
+            </div>
+
+            {/* Columna Derecha: Toma el 2do, 4to, 6to, etc. (índices impares: 1, 3, 5) */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {getSortedProducts()
+                .filter((_, index) => index % 2 !== 0)
+                .map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onSelect={onSelectProduct}
+                  />
+              ))}
+            </div>
           </div>
 
           {/* Pagination */}

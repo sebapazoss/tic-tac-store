@@ -67,7 +67,8 @@ function AppContent() {
   return (
     <div className="app-container">
       <Navbar 
-        onCartToggle={() => setCartOpen(!cartOpen)} 
+        onCartToggle={() => setCartOpen(!cartOpen)}
+        onLogoClick={() => handleNavigate('catalog')}
       />
 
       <main className="main-content">
