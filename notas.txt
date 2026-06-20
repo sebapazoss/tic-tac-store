@@ -1,9 +1,13 @@
-faltaria que un cliente que realizo un pedido pueda visualizar el mismo y el estado sin loguearse, 
-solo ver, no modificar. 
+agregar colores?
 
-como podemos hacer para que el cliente que realizo el pedido pueda consultar el estado 
-solo de ese pedido y no de todos?? 
+controlar los estados del pedido(si son todos necesarios) y como afecta uno a otro
 
-agregar opcion de ordenar el catalogo por precios acendente o decendente
+controlar los pedidos al mismo tiempo 
 
-para mas adelante la parte del pago con las funciones de mercado pago como desarrollador MUY IMPORTANTE 
+terminar lo del mail en la compra
+
+metodo de pago con mercado pago 
+
+cuando un cliente completa sus datos y vuelven a agregar otro producto que sus datos de envio permanezcan 
+
+10 
