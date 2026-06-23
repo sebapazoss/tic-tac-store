@@ -54,15 +54,20 @@ const Checkout = ({ onOrderCreated }) => {
       };
       
       const response = await ordersAPI.create(orderData);
-      
-      setOrderCreated({
-        id: response.data.id,
-        token: response.data.access_token,
-        email: response.data.customer_email,
-        total: response.data.total,
-      });
 
-      clearCart();
+      if (response.data.init_point) {
+        clearCart();
+        window.location.href = response.data.init_point;
+      } else {
+        // Fallback: la orden se creó pero MP no pudo generar la preferencia
+        setOrderCreated({
+          id: response.data.id,
+          token: response.data.access_token,
+          email: response.data.customer_email,
+          total: response.data.total,
+        });
+        clearCart();
+      }
     } catch (err) {
       console.error(err);
       if (err.response?.data?.message) {
@@ -372,7 +377,7 @@ const Checkout = ({ onOrderCreated }) => {
                 style={{ width: '100%' }}
                 disabled={loading || cart.length === 0}
               >
-                {loading ? 'Confirmando...' : 'Completar Compra'}
+                {loading ? 'Redirigiendo a Mercado Pago...' : 'Pagar con Mercado Pago'}
               </button>
             </form>
           </div>

@@ -14,31 +14,49 @@ import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import OrderAccess from './pages/OrderAccess';
 import OrderDetail from './pages/OrderDetail';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailure from './pages/PaymentFailure';
+import PaymentPending from './pages/PaymentPending';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState('catalog');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [mpOrderToken, setMpOrderToken] = useState(null);
 
   // Verificar parámetros de URL al cargar
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    // Retorno desde Mercado Pago
+    const paymentStatus = params.get('payment_status');
+    const orderToken    = params.get('order_token');
+
+    if (paymentStatus && orderToken) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setMpOrderToken(orderToken);
+
+      if (paymentStatus === 'approved')     setCurrentView('payment-success');
+      else if (paymentStatus === 'failure') setCurrentView('payment-failure');
+      else if (paymentStatus === 'pending') setCurrentView('payment-pending');
+      else setCurrentView('catalog');
+      return;
+    }
+
+    // Acceso directo a pedido por token + email en URL
     const token = params.get('token');
     const email = params.get('email');
 
     if (token && email) {
-      // Cargar el pedido automáticamente
       ordersAPI.getGuest(token, email)
         .then((response) => {
           setCurrentOrder(response.data);
           setCurrentView('order-detail');
-          // Limpiar los parámetros de la URL
           window.history.replaceState({}, document.title, window.location.pathname);
         })
         .catch((err) => {
           console.error('Error cargando pedido desde URL:', err);
-          // Navegar a order-access para que el usuario ingrese los datos manualmente
           setCurrentView('order-access');
         });
     }
@@ -94,9 +112,32 @@ function AppContent() {
         )}
 
         {currentView === 'order-detail' && currentOrder && (
-          <OrderDetail 
+          <OrderDetail
             order={currentOrder}
             onBack={() => handleNavigate('order-access')}
+          />
+        )}
+
+        {currentView === 'payment-success' && (
+          <PaymentSuccess
+            orderToken={mpOrderToken}
+            onViewOrder={() => handleNavigate('order-access')}
+            onGoHome={() => handleNavigate('catalog')}
+          />
+        )}
+
+        {currentView === 'payment-failure' && (
+          <PaymentFailure
+            onRetry={() => handleNavigate('checkout')}
+            onGoHome={() => handleNavigate('catalog')}
+          />
+        )}
+
+        {currentView === 'payment-pending' && (
+          <PaymentPending
+            orderToken={mpOrderToken}
+            onViewOrder={() => handleNavigate('order-access')}
+            onGoHome={() => handleNavigate('catalog')}
           />
         )}
       </main>
@@ -109,10 +150,10 @@ function AppContent() {
 
       <BottomNav 
         activeTab={
-          currentView === 'product-detail' || currentView === 'checkout'
-            ? 'catalog' 
+          ['product-detail', 'checkout', 'payment-success', 'payment-failure', 'payment-pending'].includes(currentView)
+            ? 'catalog'
             : currentView
-        } 
+        }
         onNavigate={handleNavigate} 
       />
     </div>
