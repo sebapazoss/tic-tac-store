@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { ShoppingBag, CreditCard, Copy, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ShoppingBag, CreditCard, Copy, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { ordersAPI } from '../services/api';
+import { ordersAPI, productsAPI } from '../services/api';
 
-const Checkout = ({ onOrderCreated }) => {
+const Checkout = ({ onOrderCreated, onBack }) => {
   const { cart, cartTotal, clearCart } = useCart();
 
   const [customerName, setCustomerName] = useState('');
@@ -16,6 +16,34 @@ const Checkout = ({ onOrderCreated }) => {
   const [loading, setLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [stockCheck, setStockCheck] = useState({ status: 'pending' });
+
+  useEffect(() => {
+    if (cart.length === 0) {
+      setStockCheck({ status: 'ok' });
+      return;
+    }
+    Promise.all(cart.map(item => productsAPI.getById(item.product.id)))
+      .then(responses => {
+        const issues = [];
+        responses.forEach((res, i) => {
+          const freshStock = res.data.stock;
+          const requested = cart[i].quantity;
+          if (freshStock < requested) {
+            issues.push({
+              name: cart[i].product.name,
+              requested,
+              available: freshStock,
+            });
+          }
+        });
+        setStockCheck(issues.length > 0
+          ? { status: 'error', issues }
+          : { status: 'ok' }
+        );
+      })
+      .catch(() => setStockCheck({ status: 'ok' }));
+  }, []);
 
   const formatPrice = (val) => {
     return new Intl.NumberFormat('es-AR', {
@@ -54,15 +82,20 @@ const Checkout = ({ onOrderCreated }) => {
       };
       
       const response = await ordersAPI.create(orderData);
-      
-      setOrderCreated({
-        id: response.data.id,
-        token: response.data.access_token,
-        email: response.data.customer_email,
-        total: response.data.total,
-      });
 
-      clearCart();
+      if (response.data.init_point) {
+        clearCart();
+        window.location.href = response.data.init_point;
+      } else {
+        // Fallback: la orden se creó pero MP no pudo generar la preferencia
+        setOrderCreated({
+          id: response.data.id,
+          token: response.data.access_token,
+          email: response.data.customer_email,
+          total: response.data.total,
+        });
+        clearCart();
+      }
     } catch (err) {
       console.error(err);
       if (err.response?.data?.message) {
@@ -192,6 +225,71 @@ const Checkout = ({ onOrderCreated }) => {
             }}>
               Guarda el token para poder consultar tu pedido en el futuro
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Verificando disponibilidad de stock
+  if (stockCheck.status === 'pending') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 20px', gap: '16px' }}>
+        <div style={{
+          width: '36px',
+          height: '36px',
+          border: '3px solid var(--outline-variant)',
+          borderTopColor: 'var(--primary)',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite'
+        }} />
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Verificando disponibilidad...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  // Stock insuficiente detectado antes de mostrar el formulario
+  if (stockCheck.status === 'error') {
+    return (
+      <div style={{ paddingBottom: '40px' }}>
+        <div style={{ maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto', paddingLeft: '20px', paddingRight: '20px', paddingTop: '32px' }}>
+          <div style={{ background: 'var(--surface-container-low)', borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <AlertTriangle size={40} color="#f97316" />
+            </div>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
+              Stock insuficiente
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px' }}>
+              Algunos productos ya no tienen el stock necesario para tu pedido:
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+              {stockCheck.issues.map((issue, i) => (
+                <div key={i} style={{
+                  background: 'var(--color-cancelled-bg)',
+                  border: '1px solid var(--color-cancelled)',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  textAlign: 'left'
+                }}>
+                  <span style={{ fontWeight: 600, fontSize: '13px' }}>{issue.name}</span>
+                  <br />
+                  <span style={{ fontSize: '12px', color: 'var(--color-cancelled)' }}>
+                    {issue.available === 0
+                      ? 'Sin stock disponible'
+                      : `Pediste ${issue.requested}, solo quedan ${issue.available}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={onBack}
+              className="btn btn-secondary"
+              style={{ width: '100%' }}
+            >
+              Volver al catálogo
+            </button>
           </div>
         </div>
       </div>
@@ -372,7 +470,7 @@ const Checkout = ({ onOrderCreated }) => {
                 style={{ width: '100%' }}
                 disabled={loading || cart.length === 0}
               >
-                {loading ? 'Confirmando...' : 'Completar Compra'}
+                {loading ? 'Redirigiendo a Mercado Pago...' : 'Pagar con Mercado Pago'}
               </button>
             </form>
           </div>
