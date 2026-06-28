@@ -104,7 +104,7 @@ function AppContent() {
         )}
 
         {currentView === 'checkout' && (
-          <Checkout onOrderCreated={handleOrderCreated} />
+          <Checkout onOrderCreated={handleOrderCreated} onBack={() => handleNavigate('catalog')} />
         )}
 
         {currentView === 'order-access' && (

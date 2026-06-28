@@ -7,6 +7,8 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
 
   if (!isOpen) return null;
 
+  const hasOutOfStock = cart.some(item => item.product.stock === 0);
+
   const formatPrice = (val) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -180,6 +182,17 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
                     {formatPrice(item.product.price)} c/u
                   </span>
 
+                  {item.product.stock === 0 && (
+                    <span style={{ fontSize: '10px', color: '#ef4444', fontWeight: 700, textAlign: 'left' }}>
+                      Sin stock
+                    </span>
+                  )}
+                  {item.product.stock > 0 && item.product.stock <= 3 && (
+                    <span style={{ fontSize: '10px', color: '#f97316', fontWeight: 700, textAlign: 'left' }}>
+                      ¡Solo quedan {item.product.stock}!
+                    </span>
+                  )}
+
                   {/* Quantity Actions */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                     <div style={{
@@ -214,8 +227,9 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
                       }}>
                         {item.quantity}
                       </span>
-                      <button 
+                      <button
                         onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        disabled={item.quantity >= item.product.stock}
                         style={{
                           background: 'none',
                           border: 'none',
@@ -225,7 +239,8 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          cursor: 'pointer'
+                          cursor: item.quantity >= item.product.stock ? 'not-allowed' : 'pointer',
+                          opacity: item.quantity >= item.product.stock ? 0.3 : 1,
                         }}
                       >
                         <Plus size={10} />
@@ -287,15 +302,40 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
               </span>
             </div>
 
-            <button 
+            {hasOutOfStock && (
+              <div style={{
+                background: 'var(--color-cancelled-bg)',
+                border: '1px solid var(--color-cancelled)',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                fontSize: '12px',
+                color: 'var(--color-cancelled)',
+                textAlign: 'left',
+                lineHeight: '1.5'
+              }}>
+                {cart.filter(item => item.product.stock === 0).map(item => (
+                  <div key={item.product.id}>
+                    <strong>{item.product.name}</strong> está agotado.
+                  </div>
+                ))}
+                <div style={{ marginTop: '4px' }}>
+                  Retirá los artículos agotados para continuar.
+                </div>
+              </div>
+            )}
+
+            <button
               onClick={() => {
                 onCheckout();
                 onClose();
               }}
               className="btn btn-primary"
+              disabled={hasOutOfStock}
               style={{
                 width: '100%',
-                fontSize: '12px'
+                fontSize: '12px',
+                opacity: hasOutOfStock ? 0.5 : 1,
+                cursor: hasOutOfStock ? 'not-allowed' : 'pointer',
               }}
             >
               Continuar Compra
