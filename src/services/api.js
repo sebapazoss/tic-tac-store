@@ -4,9 +4,9 @@ import axios from 'axios';
 const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
 // API Base URL
-export const API_BASE_URL = isProduction
-  ? 'https://tu-backend-dominio.com/api'  // Cambiar en producción
-  : 'http://localhost:8000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (isProduction
+  ? 'https://e-commerse-pazos-vedoya.vercel.app/api/api'  // Cambiar en producción o usar variable de entorno
+  : 'http://localhost:8000/api');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
