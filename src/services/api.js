@@ -5,7 +5,7 @@ const isProduction = window.location.hostname !== 'localhost' && window.location
 
 // API Base URL
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (isProduction
-  ? 'https://e-commerse-pazos-vedoya.vercel.app/api/api'  // Cambiar en producción o usar variable de entorno
+  ? '/api'  // Cambiar en producción (el proxy de vercel.json redirige a https://e-commerse-pazos-vedoya.vercel.app/api/api)
   : 'http://localhost:8000/api');
 
 const api = axios.create({
