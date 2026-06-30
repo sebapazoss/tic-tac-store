@@ -1,0 +1,21 @@
+/* App layouts styling */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: calc(var(--bottom-nav-height) + 16px);
+}
+
+.main-content {
+  flex: 1;
+  padding: 16px;
+  width: 100%;
+  max-width: 600px; /* Perfect for mobile-first layout */
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    max-width: 768px;
+  }
+}

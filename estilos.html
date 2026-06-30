@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Horology - Catalog</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#c8c6c8",
+                        "on-tertiary-fixed": "#001a41",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "secondary-fixed": "#ffe088",
+                        "inverse-on-surface": "#f0f0f2",
+                        "secondary-fixed-dim": "#e9c349",
+                        "surface": "#f9f9fb",
+                        "surface-container": "#eeeef0",
+                        "on-tertiary-fixed-variant": "#004493",
+                        "on-secondary-container": "#745c00",
+                        "outline": "#77767b",
+                        "tertiary-fixed": "#d8e2ff",
+                        "secondary-container": "#fed65b",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#5f5e60",
+                        "surface-variant": "#e2e2e4",
+                        "on-secondary-fixed": "#241a00",
+                        "on-surface-variant": "#46464a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d9dadc",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e8e8ea",
+                        "surface-bright": "#f9f9fb",
+                        "surface-container-low": "#f3f3f5",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#868587",
+                        "on-tertiary-container": "#2a81ff",
+                        "tertiary": "#00030f",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#e4e2e4",
+                        "surface-container-highest": "#e2e2e4",
+                        "tertiary-container": "#001c44",
+                        "background": "#f9f9fb",
+                        "primary-fixed-dim": "#c8c6c8",
+                        "outline-variant": "#c7c6ca",
+                        "on-primary-fixed": "#1b1b1d",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "secondary": "#735c00",
+                        "on-primary-fixed-variant": "#474649",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#1d1d1f",
+                        "on-secondary-fixed-variant": "#574500",
+                        "primary": "#030304",
+                        "on-background": "#1a1c1d",
+                        "on-surface": "#1a1c1d",
+                        "inverse-surface": "#2f3132"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "gutter": "16px",
+                        "container-margin": "20px",
+                        "stack-lg": "32px",
+                        "unit": "8px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "title-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .product-card-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .product-card-shadow:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 10px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-surface font-body-lg overflow-x-hidden">
+    <!-- TopAppBar Shell -->
+    <header
+        class="fixed top-0 w-full z-50 bg-surface border-b border-surface-variant flex justify-between items-center px-container-margin h-16 w-full max-w-7xl mx-auto">
+        <div class="flex items-center gap-4">
+            <button class="hover:opacity-70 transition-opacity active:scale-95 transition-transform duration-200">
+                <span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+            </button>
+        </div>
+        <div class="font-headline-lg-mobile text-headline-lg-mobile tracking-tighter text-primary">HOROLOGY</div>
+        <div class="flex items-center gap-4">
+            <button class="hover:opacity-70 transition-opacity active:scale-95 transition-transform duration-200">
+                <span class="material-symbols-outlined text-primary" data-icon="shopping_bag">shopping_bag</span>
+            </button>
+        </div>
+    </header>
+    <main class="pt-24 pb-32 px-container-margin max-w-7xl mx-auto">
+        <!-- Search & Filter Bar -->
+        <div class="flex flex-col gap-stack-md mb-stack-lg">
+            <div class="flex items-center gap-stack-sm">
+                <div class="relative flex-grow">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]"
+                        data-icon="search">search</span>
+                    <input
+                        class="w-full pl-10 pr-4 py-3 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary text-body-sm placeholder:text-on-surface-variant transition-all"
+                        placeholder="Search collection..." type="text" />
+                </div>
+                <button
+                    class="flex items-center gap-2 px-4 py-3 bg-surface-container border border-outline-variant rounded-xl active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[18px]" data-icon="tune">tune</span>
+                    <span class="font-label-caps text-label-caps">FILTERS</span>
+                </button>
+            </div>
+            <!-- Chips / Categories -->
+            <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
+                <button
+                    class="px-5 py-1.5 rounded-full bg-primary-container text-white font-label-caps text-label-caps whitespace-nowrap">ALL
+                    TIMEPIECES</button>
+                <button
+                    class="px-5 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant font-label-caps text-label-caps whitespace-nowrap hover:bg-surface-variant transition-colors">AUTOMATIC</button>
+                <button
+                    class="px-5 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant font-label-caps text-label-caps whitespace-nowrap hover:bg-surface-variant transition-colors">CHRONOGRAPH</button>
+                <button
+                    class="px-5 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant font-label-caps text-label-caps whitespace-nowrap hover:bg-surface-variant transition-colors">VINTAGE</button>
+                <button
+                    class="px-5 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant font-label-caps text-label-caps whitespace-nowrap hover:bg-surface-variant transition-colors">DIVE</button>
+            </div>
+        </div>
+        <!-- Catalog Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+            <!-- Product Card 1 -->
+            <div class="flex flex-col group cursor-pointer">
+                <div
+                    class="relative aspect-[4/5] bg-surface-container-low rounded-xl mb-3 overflow-hidden product-card-shadow">
+                    <img alt="Premium Watch"
+                        class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700"
+                        data-alt="A professional studio photograph of a luxury mechanical wristwatch with a sleek silver case and a minimalist black leather strap. The watch is positioned against a clean, neutral grey background with soft, diffused top-down lighting that emphasizes the metallic textures and the polished sapphire crystal. The overall aesthetic is refined and prestigious, reflecting a modern light-mode design with high-end craftsmanship."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeV_6Kxd-xYZKFSuQlrWuw8lcaFgvaK6jkKsFLFDYu3DABSPb3y-lj_KSNjnRmQjQEsKZwFukk-gUFizB-oKFkWHVDoCav9U62jxicVvTxyWy0v4sCihiZQLzBAdk6qyWXsdxSrOSXMxNCBzGIk3swjPkK1QSRvQglMYP9hP1iVNBqtjnRJ9pFe5ceI_nZAOVwRhY2imUnG8xxY4u9SdeEjWdWu8ZuIyAUcM4rnMUvPCu5o6qAwjoMTpzqEsLzUZyAQJmJgAy65h0" />
+                    <button
+                        class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-surface/80 backdrop-blur-md rounded-full text-on-surface active:scale-90 transition-transform">
+                        <span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+                    </button>
+                </div>
+                <div class="px-1">
+                    <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">VACHERON CONSTANTIN</p>
+                    <h3 class="font-title-md text-body-lg text-primary mb-1 truncate">Patrimony Manual</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">$21,500</p>
+                </div>
+            </div>
+            <!-- Product Card 2 -->
+            <div class="flex flex-col group cursor-pointer">
+                <div
+                    class="relative aspect-[4/5] bg-surface-container-low rounded-xl mb-3 overflow-hidden product-card-shadow">
+                    <img alt="Premium Watch"
+                        class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700"
+                        data-alt="Close-up detail shot of a sophisticated dive watch with a rotating ceramic bezel and luminous dial markers. The watch is presented on a minimalist stone pedestal under dramatic, focused cinematic lighting that highlights the brushed steel finish. The atmosphere is technically precise and authoritative, set within a bright, airy gallery environment that emphasizes quiet luxury and horological excellence."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCA464Pz-VYWe7p0-fD7x4fd4o4LLfdyKT9vbv5EUyYsFsO2BA_UqxvKWgrakzNsb2NNeg3Lbu08gGpZ0gaQO1aZ1ozhSMSGnYyQ5SqfjrUUYn3XPXI3aajpL3jZIBzAv8P09DiLu8idKahY1GxMtB1y8dZJ05FL1o86hVhccil5jfjwT2zawFS3S-AmE-MZhAH1JXiPvtiPgnpL8A6Aj51mxrLIdjXT__OrT9lgNPF_vO_Vcy80mo8PHEk1W8cvKxGvuIdy3Zi8o" />
+                    <button
+                        class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-surface/80 backdrop-blur-md rounded-full text-on-surface active:scale-90 transition-transform">
+                        <span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+                    </button>
+                </div>
+                <div class="px-1">
+                    <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">PATEK PHILIPPE</p>
+                    <h3 class="font-title-md text-body-lg text-primary mb-1 truncate">Calatrava 5227G</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">$37,850</p>
+                </div>
+            </div>
+            <!-- Product Card 3 -->
+            <div class="flex flex-col group cursor-pointer">
+                <div
+                    class="relative aspect-[4/5] bg-surface-container-low rounded-xl mb-3 overflow-hidden product-card-shadow">
+                    <img alt="Premium Watch"
+                        class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700"
+                        data-alt="An elegant gold dress watch with a cream dial and Roman numerals, showcased on a high-texture linen surface. The lighting is warm and natural, suggesting a bright morning in a prestigious study. The image captures the fine intricate details of the watch hands and crown, embodying a minimalist and modern structural integrity that appeals to serious collectors and enthusiasts of fine craftsmanship."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Mp2ROmz6KFFyzkXUOO7-AbmhYWKoS4gt5nLuH7YLCYllc_vQHQt_Md-fDJYxiCBxXVYuOt03-d04M5ieq2VcHmCj-kx5_-zhLvVKWlAazdDO2-ORW2aSl8DdalLTNupDh4aDHe4LkyhK08ir6UwvLlAmvX6hLMmWgh_dx-f25LfWCTT05lg8W5uqrdtFLdoaeiNRgNjPfhvJERJBnZ1KcrsZ11kaN-EaZPnnOtIxFxTq6N78rztJC9VSTsp_-SoOpg0vqER79K4" />
+                    <button
+                        class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-surface/80 backdrop-blur-md rounded-full text-on-surface active:scale-90 transition-transform">
+                        <span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+                    </button>
+                </div>
+                <div class="px-1">
+                    <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">A. LANGE &amp; SÖHNE</p>
+                    <h3 class="font-title-md text-body-lg text-primary mb-1 truncate">Saxonia Thin</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">$18,200</p>
+                </div>
+            </div>
+            <!-- Product Card 4 -->
+            <div class="flex flex-col group cursor-pointer">
+                <div
+                    class="relative aspect-[4/5] bg-surface-container-low rounded-xl mb-3 overflow-hidden product-card-shadow">
+                    <img alt="Premium Watch"
+                        class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700"
+                        data-alt="A modern skeletonized wristwatch revealing the complex inner gears and balance wheel, shot against a stark white background. High-key lighting creates a frictionless and futuristic aesthetic, emphasizing the technical precision of the movement. The color palette is strictly charcoal and silver with occasional brass accents, maintaining a curated and prestigious brand identity through expansive whitespace and reductionist UI principles."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNOgparSNpoWuQL3TuGbJD3Pp6CPcRrBJ1nSS0gltl8jwtpHQNNspy1FkWQyUvn9FSHhrYFscQi7dR2D_sY6IVwG5AsNUnpjpjQDO---18Y7kPbqpc43U60vfL04lN2R1zHBH4Y4V2FZn9U5EgmdCFRJlDeHCBhRi3CE4F5JdObFL6ZfDIgHAts2VgwmLru6vRnjAZBMlpO3xlRaxV-EFZx8vDWLgtKDebcaH3PizhfSSoPbQor4GPqkAszn0_3Q4kJp33yA-DH_0" />
+                    <button
+                        class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-surface/80 backdrop-blur-md rounded-full text-on-surface active:scale-90 transition-transform">
+                        <span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+                    </button>
+                </div>
+                <div class="px-1">
+                    <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">AUDEMARS PIGUET</p>
+                    <h3 class="font-title-md text-body-lg text-primary mb-1 truncate">Royal Oak Jumbo</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">$62,000</p>
+                </div>
+            </div>
+            <!-- Product Card 5 -->
+            <div class="flex flex-col group cursor-pointer">
+                <div
+                    class="relative aspect-[4/5] bg-surface-container-low rounded-xl mb-3 overflow-hidden product-card-shadow">
+                    <img alt="Premium Watch"
+                        class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700"
+                        data-alt="A macro photograph of a chronograph watch dial showing the sub-dials and tachymeter scale in sharp detail. The watch is placed on a dark obsidian surface that reflects the bright, cool-toned studio lights. The composition is asymmetrical and dynamic, showcasing the intricate textures of the dial while maintaining the brand's 'quiet luxury' emotional response through a calm and frictionless visual presentation."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9tDobAZBaR3ofyous5xtIVL3z9FatqZwWblikU1L9sFRe1DRj4P0V7eEiucP6JkfWT6ML-UdETcGMxVKDYovJ9m47SAmERvIJuZZ_GxPMMPaiSycyYQVSRX9NzxkLrNZbOvil6HtvmfM-Y-0CZ77E1PTmX8FLnff0GjrZNl2OtnqAYhHR_YMYulroudNQOdZlYOb9GR0daWqlGZdVdCf-I3hwYiYVmSZKbFpryKOxGWJpyrcxkQjAPSGyXfqGvSLxZLqOwqX8TMk" />
+                    <button
+                        class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-surface/80 backdrop-blur-md rounded-full text-on-surface active:scale-90 transition-transform">
+                        <span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+                    </button>
+                </div>
+                <div class="px-1">
+                    <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">ROLEX</p>
+                    <h3 class="font-title-md text-body-lg text-primary mb-1 truncate">Cosmograph Daytona</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">$45,900</p>
+                </div>
+            </div>
+            <!-- Product Card 6 -->
+            <div class="flex flex-col group cursor-pointer">
+                <div
+                    class="relative aspect-[4/5] bg-surface-container-low rounded-xl mb-3 overflow-hidden product-card-shadow">
+                    <img alt="Premium Watch"
+                        class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700"
+                        data-alt="A vintage-inspired pilot watch with a large crown and bold luminous numbers, displayed alongside high-quality leather goods. The scene is illuminated with soft, ambient lighting that creates subtle tonal layers and soft shadows. The overall design follows a minimalist approach with a modern structural integrity, ensuring that the watch remains the focal point against a background of neutral, premium materials."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVBIWZPA1n_AO08rKYEBk3QKPZm8MawDKGxo1EGTUClLSauIq1GbHORdmtZachJMK-jECyvM4siNz479q941h0yahiyJMVxTedOFkXC_AIWkT6vB-X3cQ4SiPwHROMzXovTZEZq3IB9b63wX9T0L4ibNqptemO5-URc7KUJeP9peDNKaSkuoHW1RQ1Q0h6fK4T9pryMAO7oXZEkjmiDKPk7WjVvsdQOWHWAfW58SPj1bHqZyIVtsL_IZt4JHBlWnTX5vYNwcmdjcU" />
+                    <button
+                        class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-surface/80 backdrop-blur-md rounded-full text-on-surface active:scale-90 transition-transform">
+                        <span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+                    </button>
+                </div>
+                <div class="px-1">
+                    <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">IWC SCHAFFHAUSEN</p>
+                    <h3 class="font-title-md text-body-lg text-primary mb-1 truncate">Big Pilot's Watch 43</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">$8,950</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- BottomNavBar Shell -->
+    <nav
+        class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-surface border-t border-surface-variant z-50 shadow-sm">
+        <button
+            class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-all">
+            <span class="material-symbols-outlined" data-icon="home">home</span>
+            <span class="font-label-caps text-label-caps mt-1">Home</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-primary font-bold bg-surface-container rounded-xl px-3 py-1 scale-95 transition-all duration-150">
+            <span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+            <span class="font-label-caps text-label-caps mt-1">Catalog</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-all">
+            <span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+            <span class="font-label-caps text-label-caps mt-1">Saved</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-all">
+            <span class="material-symbols-outlined" data-icon="person">person</span>
+            <span class="font-label-caps text-label-caps mt-1">Profile</span>
+        </button>
+    </nav>
+    <script>
+        // Simple Micro-interactions
+        document.querySelectorAll('.cursor-pointer').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const img = card.querySelector('img');
+                if (img) img.style.transform = 'scale(1.05)';
+            });
+            card.addEventListener('mouseleave', () => {
+                const img = card.querySelector('img');
+                if (img) img.style.transform = 'scale(1)';
+            });
+        });
+
+        // Search Bar Focus Effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-1', 'ring-primary');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-1', 'ring-primary');
+        });
+    </script>
+</body>
+
+</html>
